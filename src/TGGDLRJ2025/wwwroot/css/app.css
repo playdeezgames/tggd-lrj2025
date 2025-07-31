@@ -117,6 +117,7 @@ code {
 .pixel-grid-table {
     border-collapse: collapse;
     margin: 20px;
+    outline: none;
 }
 
 .pixel-grid-td {

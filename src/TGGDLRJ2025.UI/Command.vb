@@ -1,10 +1,10 @@
 ﻿Public Module Command
-    Public ReadOnly UP As String = NameOf(UP)
-    Public ReadOnly DOWN As String = NameOf(DOWN)
-    Public ReadOnly LEFT As String = NameOf(LEFT)
-    Public ReadOnly RIGHT As String = NameOf(RIGHT)
-    Public ReadOnly GREEN As String = NameOf(GREEN)
-    Public ReadOnly RED As String = NameOf(RED)
-    Public ReadOnly BLUE As String = NameOf(BLUE)
-    Public ReadOnly YELLOW As String = NameOf(YELLOW)
+    Public ReadOnly Up As String = NameOf(Up)
+    Public ReadOnly Down As String = NameOf(Down)
+    Public ReadOnly Left As String = NameOf(Left)
+    Public ReadOnly Right As String = NameOf(Right)
+    Public ReadOnly Green As String = NameOf(Green)
+    Public ReadOnly Red As String = NameOf(Red)
+    Public ReadOnly Blue As String = NameOf(Blue)
+    Public ReadOnly Yellow As String = NameOf(Yellow)
 End Module

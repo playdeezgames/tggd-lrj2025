@@ -2,22 +2,20 @@
 
 <PageTitle>Temporary Title of SPLORR!!</PageTitle>
 
-<div tabindex="1" @onkeydown="HandleKeyDown" @onkeydown:preventDefault="ShouldPreventDefault">
-	<table class="pixel-grid-table" >
-		@foreach(int row in Enumerable.Range(0,64))
-		{
-			<tr>
-				@foreach(int column in Enumerable.Range(0,64))
-				{
-					<td class="pixel-grid-td" style="background-color: @GetBackgroundColor(column, row)"></td>
-				}
-			</tr>
-		}
-	</table>
-</div>
+<table class="pixel-grid-table" tabindex="1" @onkeydown="HandleKeyDown" @onkeydown:preventDefault="ShouldPreventDefault" autofocus>
+	@foreach(int row in Enumerable.Range(0,64))
+	{
+		<tr>
+			@foreach(int column in Enumerable.Range(0,64))
+			{
+				<td class="pixel-grid-td" style="background-color: @GetBackgroundColor(column, row)"></td>
+			}
+		</tr>
+	}
+</table>
 
 @code{
-	IUIContext? context = null;
+	IUIContext context = new UIContext(BUFFER_WIDTH, BUFFER_HEIGHT, FrameBuffer);
 	const int BUFFER_WIDTH = 64;
 	const int BUFFER_HEIGHT = 64;
 	private bool ShouldPreventDefault = false;
@@ -42,22 +40,22 @@
 	};
 	readonly IReadOnlyDictionary<string, string> CommandTable = new Dictionary<string, string>()
 		{
-			["q"] = Command.LEFT,
-			["z"] = Command.UP,
-			["w"] = Command.UP,
-			["a"] = Command.LEFT,
-			["s"] = Command.DOWN,
-			["d"] = Command.RIGHT,
-			["ArrowUp"] = Command.UP,
-			["ArrowDown"] = Command.DOWN,
-			["ArrowLeft"] = Command.LEFT,
-			["ArrowRight"] = Command.RIGHT,
-			[" "] = Command.GREEN,
-			["Enter"] = Command.BLUE,
-			["Tab"] = Command.YELLOW,
-			["Escape"] = Command.RED
+			["q"] = Command.Left,
+			["z"] = Command.Up,
+			["w"] = Command.Up,
+			["a"] = Command.Left,
+			["s"] = Command.Down,
+			["d"] = Command.Right,
+			["ArrowUp"] = Command.Up,
+			["ArrowDown"] = Command.Down,
+			["ArrowLeft"] = Command.Left,
+			["ArrowRight"] = Command.Right,
+			[" "] = Command.Green,
+			["Enter"] = Command.Blue,
+			["Tab"] = Command.Yellow,
+			["Escape"] = Command.Red
 		};
-	int[] FrameBuffer = new int[BUFFER_HEIGHT * BUFFER_WIDTH];
+	static int[] FrameBuffer = new int[BUFFER_HEIGHT * BUFFER_WIDTH];
 	private string GetBackgroundColor(int column, int row)
 	{
 		return Palette[FrameBuffer[column + row * BUFFER_WIDTH]];
@@ -65,7 +63,6 @@
 	protected override void OnInitialized()
 	{
 		base.OnInitialized();
-		context = new UIContext(BUFFER_WIDTH, BUFFER_HEIGHT, FrameBuffer);
 		context.Refresh();
 	}
 	private void HandleKeyDown(KeyboardEventArgs args)
@@ -73,6 +70,8 @@
 		if (CommandTable.TryGetValue(args.Key, out string? command))
 		{
 			ShouldPreventDefault = true;
+			context!.HandleCommand(command);
+			context!.Refresh();
 		}
 		else
 		{
