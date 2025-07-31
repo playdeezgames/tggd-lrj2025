@@ -2,7 +2,7 @@
 
 <PageTitle>Temporary Title of SPLORR!!</PageTitle>
 
-<div tabindex="1" @onkeypress="HandleKeyPress">
+<div tabindex="1" @onkeydown="HandleKeyDown" @onkeydown:preventDefault="ShouldPreventDefault">
 	<table class="pixel-grid-table" >
 		@foreach(int row in Enumerable.Range(0,64))
 		{
@@ -20,6 +20,7 @@
 	IUIContext? context = null;
 	const int BUFFER_WIDTH = 64;
 	const int BUFFER_HEIGHT = 64;
+	private bool ShouldPreventDefault = false;
 	readonly IReadOnlyList<string> Palette = new List<string>()
 	{
 		"#000",
@@ -39,6 +40,23 @@
 		"#ff5",
 		"#fff"
 	};
+	readonly IReadOnlyDictionary<string, string> CommandTable = new Dictionary<string, string>()
+		{
+			["q"] = Command.LEFT,
+			["z"] = Command.UP,
+			["w"] = Command.UP,
+			["a"] = Command.LEFT,
+			["s"] = Command.DOWN,
+			["d"] = Command.RIGHT,
+			["ArrowUp"] = Command.UP,
+			["ArrowDown"] = Command.DOWN,
+			["ArrowLeft"] = Command.LEFT,
+			["ArrowRight"] = Command.RIGHT,
+			[" "] = Command.GREEN,
+			["Enter"] = Command.BLUE,
+			["Tab"] = Command.YELLOW,
+			["Escape"] = Command.RED
+		};
 	int[] FrameBuffer = new int[BUFFER_HEIGHT * BUFFER_WIDTH];
 	private string GetBackgroundColor(int column, int row)
 	{
@@ -50,8 +68,15 @@
 		context = new UIContext(BUFFER_WIDTH, BUFFER_HEIGHT, FrameBuffer);
 		context.Refresh();
 	}
-	private void HandleKeyPress(KeyboardEventArgs args)
+	private void HandleKeyDown(KeyboardEventArgs args)
 	{
-		
+		if (CommandTable.TryGetValue(args.Key, out string? command))
+		{
+			ShouldPreventDefault = true;
+		}
+		else
+		{
+			ShouldPreventDefault = false;
+		}
 	}
 }
