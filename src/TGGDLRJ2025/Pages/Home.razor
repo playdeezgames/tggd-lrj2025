@@ -2,17 +2,20 @@
 
 <PageTitle>Temporary Title of SPLORR!!</PageTitle>
 
-<table class="pixel-grid-table">
-	@foreach(int row in Enumerable.Range(0,64))
-	{
-		<tr>
-			@foreach(int column in Enumerable.Range(0,64))
-			{
-				<td class="pixel-grid-td" style="background-color: @GetBackgroundColor(column, row)"></td>
-			}
-		</tr>
-	}
-</table>
+<div tabindex="1" @onkeypress="HandleKeyPress">
+	<table class="pixel-grid-table" >
+		@foreach(int row in Enumerable.Range(0,64))
+		{
+			<tr>
+				@foreach(int column in Enumerable.Range(0,64))
+				{
+					<td class="pixel-grid-td" style="background-color: @GetBackgroundColor(column, row)"></td>
+				}
+			</tr>
+		}
+	</table>
+</div>
+
 @code{
 	IUIContext? context = null;
 	const int BUFFER_WIDTH = 64;
@@ -46,5 +49,9 @@
 		base.OnInitialized();
 		context = new UIContext(BUFFER_WIDTH, BUFFER_HEIGHT, FrameBuffer);
 		context.Refresh();
+	}
+	private void HandleKeyPress(KeyboardEventArgs args)
+	{
+		
 	}
 }
