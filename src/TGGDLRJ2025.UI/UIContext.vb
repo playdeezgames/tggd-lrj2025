@@ -13,10 +13,13 @@ Public Class UIContext
     End Sub
 
     Public Sub Refresh() Implements IUIContext.Refresh
+        buffer.Fill(Hue.Blue)
+        Fonts.GetFont(Font.CyFont4x6).Write(buffer, 1, 1, Hue.Black, "Hello, world!")
+        Fonts.GetFont(Font.CyFont4x6).Write(buffer, 0, 0, Hue.White, "Hello, world!")
+        buffer.SetPixel(column, row, Hue.Red)
     End Sub
 
     Public Sub HandleCommand(command As String) Implements IUIContext.HandleCommand
-        buffer.SetPixel(column, row, Hue.Black)
         Select Case command
             Case UI.Command.Up
                 row -= 1
@@ -27,6 +30,5 @@ Public Class UIContext
             Case UI.Command.Right
                 column += 1
         End Select
-        buffer.SetPixel(column, row, Hue.White)
     End Sub
 End Class

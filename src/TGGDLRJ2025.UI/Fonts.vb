@@ -5058,6 +5058,7 @@ Friend Module Fonts
 }"}
         }
     Private ReadOnly dataTable As New Dictionary(Of String, FontData)
+    Private ReadOnly fontTable As New Dictionary(Of String, IUIFont(Of Integer))
     Friend Function GetFontData(fontName As String) As FontData
         Dim result As FontData = Nothing
         If dataTable.TryGetValue(fontName, result) Then
@@ -5070,5 +5071,18 @@ Friend Module Fonts
             Return result
         End If
         Return result
+    End Function
+    Friend Function GetFont(fontName As String) As IUIFont(Of Integer)
+        Dim result As IUIFont(Of Integer) = Nothing
+        If fontTable.TryGetValue(fontName, result) Then
+            Return result
+        End If
+        Dim fontData = GetFontData(fontName)
+        If fontData IsNot Nothing Then
+            Dim uiFont As New UIFont(Of Integer)(fontData)
+            fontTable(fontName) = uiFont
+            Return uiFont
+        End If
+        Return Nothing
     End Function
 End Module

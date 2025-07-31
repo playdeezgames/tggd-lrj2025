@@ -16,4 +16,16 @@
             pixelBuffer(column + row * columns) = hue
         End If
     End Sub
+
+    Public Sub Fill(column As Integer, row As Integer, columns As Integer, rows As Integer, hue As TPixel) Implements IUIBuffer(Of TPixel).Fill
+        For Each y In Enumerable.Range(row, rows)
+            For Each x In Enumerable.Range(column, columns)
+                SetPixel(x, y, hue)
+            Next
+        Next
+    End Sub
+
+    Public Sub Fill(hue As TPixel) Implements IUIBuffer(Of TPixel).Fill
+        Fill(0, 0, columns, rows, hue)
+    End Sub
 End Class
