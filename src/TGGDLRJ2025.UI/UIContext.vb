@@ -11,7 +11,7 @@
         Me.buffer = buffer
         column = columns \ 2
         row = rows \ 2
-        buffer(column + row * columns) = Hue.White
+        buffer(column + row * columns) = Hue.LightRed
     End Sub
 
     Public Sub Refresh() Implements IUIContext.Refresh
@@ -29,6 +29,6 @@
             Case UI.Command.RIGHT
                 column += 1
         End Select
-        buffer(column + row * columns) = Hue.White
+        buffer(column + row * columns) = Hue.LightRed
     End Sub
 End Class
