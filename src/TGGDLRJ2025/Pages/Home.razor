@@ -2,3 +2,39 @@
 
 <PageTitle>Temporary Title of SPLORR!!</PageTitle>
 
+<table class="pixel-grid-table">
+	@foreach(int row in Enumerable.Range(0,64))
+	{
+		<tr>
+			@foreach(int column in Enumerable.Range(0,64))
+			{
+				<td class="pixel-grid-td" style="background-color: @GetBackgroundColor(column, row)"></td>
+			}
+		</tr>
+	}
+</table>
+@code{
+	readonly IReadOnlyList<string> Palette = new List<string>()
+	{
+		"#000",
+		"#00a",
+		"#0a0",
+		"#0aa",
+		"#a00",
+		"#a0a",
+		"#a50",
+		"#aaa",
+		"#555",
+		"#55f",
+		"#5f5",
+		"#5ff",
+		"#f55",
+		"#f5f",
+		"#ff5",
+		"#fff"
+	};
+	private string GetBackgroundColor(int column, int row)
+	{
+		return Palette[(column + row) % Palette.Count];
+	}
+}

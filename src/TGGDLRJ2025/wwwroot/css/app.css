@@ -1,5 +1,6 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: #111;
 }
 
 h1:focus {
@@ -111,4 +112,16 @@ code {
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
+}
+
+.pixel-grid-table {
+    border-collapse: collapse;
+    margin: 20px;
+}
+
+.pixel-grid-td {
+    width: 8px;
+    height: 8px;
+    border: 0px;
+    padding: 0;
 }
