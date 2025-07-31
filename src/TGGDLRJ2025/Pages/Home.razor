@@ -14,6 +14,8 @@
 	}
 </table>
 @code{
+	const int BUFFER_WIDTH = 64;
+	const int BUFFER_HEIGHT = 64;
 	readonly IReadOnlyList<string> Palette = new List<string>()
 	{
 		"#000",
@@ -33,8 +35,13 @@
 		"#ff5",
 		"#fff"
 	};
+	int[] FrameBuffer = new int[BUFFER_HEIGHT * BUFFER_WIDTH];
 	private string GetBackgroundColor(int column, int row)
 	{
-		return Palette[(column + row) % Palette.Count];
+		return Palette[FrameBuffer[column + row * BUFFER_WIDTH]];
+	}
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
 	}
 }
