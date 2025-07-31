@@ -5,6 +5,8 @@ VisualStudioVersion = 17.14.36301.6 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TGGDLRJ2025", "TGGDLRJ2025\TGGDLRJ2025.csproj", "{9B64EF69-EBFB-4B0F-AD85-F1FF50927558}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "TGGDLRJ2025.UI", "TGGDLRJ2025.UI\TGGDLRJ2025.UI.vbproj", "{5A19E4C0-5BAD-471D-885F-FA1CEEBD406C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{9B64EF69-EBFB-4B0F-AD85-F1FF50927558}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B64EF69-EBFB-4B0F-AD85-F1FF50927558}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B64EF69-EBFB-4B0F-AD85-F1FF50927558}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A19E4C0-5BAD-471D-885F-FA1CEEBD406C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A19E4C0-5BAD-471D-885F-FA1CEEBD406C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A19E4C0-5BAD-471D-885F-FA1CEEBD406C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A19E4C0-5BAD-471D-885F-FA1CEEBD406C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

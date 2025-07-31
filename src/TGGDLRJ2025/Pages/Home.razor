@@ -14,6 +14,7 @@
 	}
 </table>
 @code{
+	IUIContext? context = null;
 	const int BUFFER_WIDTH = 64;
 	const int BUFFER_HEIGHT = 64;
 	readonly IReadOnlyList<string> Palette = new List<string>()
@@ -43,5 +44,7 @@
 	protected override void OnInitialized()
 	{
 		base.OnInitialized();
+		context = new UIContext(BUFFER_WIDTH, BUFFER_HEIGHT, FrameBuffer);
+		context.Refresh();
 	}
 }
