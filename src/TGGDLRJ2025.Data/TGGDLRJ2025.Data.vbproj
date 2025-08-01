@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>TGGDLRJ2025.UI</RootNamespace>
+    <RootNamespace>TGGDLRJ2025.Data</RootNamespace>
     <TargetFramework>net9.0</TargetFramework>
     <OptionStrict>On</OptionStrict>
   </PropertyGroup>
@@ -13,14 +13,5 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="9.0.7" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\TGGD.UI\TGGD.UI.vbproj" />
-    <ProjectReference Include="..\TGGDLRJ2025.Business\TGGDLRJ2025.Business.vbproj" />
-  </ItemGroup>
 
 </Project>
