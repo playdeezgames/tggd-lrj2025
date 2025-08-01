@@ -3,7 +3,7 @@
 
 <PageTitle>Temporary Title of SPLORR!!</PageTitle>
 
-<table class="pixel-grid-table" tabindex="1" @onkeydown="HandleKeyDown" @onkeydown:preventDefault="ShouldPreventDefault" autofocus>
+<table class="pixel-grid-table" tabindex="1" @onkeydown="HandleKeyDownAsync" @onkeydown:preventDefault="ShouldPreventDefault" autofocus>
 	@foreach (int row in Enumerable.Range(0, BUFFER_HEIGHT))
 	{
 		<tr>
@@ -14,11 +14,12 @@
 		</tr>
 	}
 </table>
+<audio id="PlayerHit" src="PlayerHit.wav"></audio>
 
 @code{
 	IUIContext context = new UIContext(BUFFER_WIDTH, BUFFER_HEIGHT, FrameBuffer);
-	const int BUFFER_WIDTH = 160;
-	const int BUFFER_HEIGHT = 100;
+	const int BUFFER_WIDTH = 64;
+	const int BUFFER_HEIGHT = 64;
 	private bool ShouldPreventDefault = false;
 	readonly IReadOnlyList<string> Palette = new List<string>()
 	{
@@ -61,18 +62,28 @@
 	{
 		return Palette[FrameBuffer[column + row * BUFFER_WIDTH]];
 	}
-	protected override void OnInitialized()
+	protected override async Task OnInitializedAsync()
 	{
-		base.OnInitialized();
+		await base.OnInitializedAsync();
 		context.Refresh();
+		await ProcessSfxAsync();
 	}
-	private void HandleKeyDown(KeyboardEventArgs args)
+	private async Task ProcessSfxAsync()
+	{
+		while (!string.IsNullOrEmpty(context.Sfx))
+		{
+			await JSRuntime.InvokeVoidAsync("playSfx", context.Sfx);
+			context.NextSfx();
+		}
+	}
+	private async Task HandleKeyDownAsync(KeyboardEventArgs args)
 	{
 		if (CommandTable.TryGetValue(args.Key, out string? command))
 		{
 			ShouldPreventDefault = true;
 			context!.HandleCommand(command);
 			context!.Refresh();
+			await ProcessSfxAsync();
 		}
 		else
 		{

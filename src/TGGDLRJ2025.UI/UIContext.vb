@@ -15,7 +15,7 @@ Public Class UIContext
 
     Public ReadOnly Property Sfx As String Implements IUIContext.Sfx
         Get
-            Return sfxQueue.Peek()
+            Return If(sfxQueue.Any, sfxQueue.Peek(), Nothing)
         End Get
     End Property
 
