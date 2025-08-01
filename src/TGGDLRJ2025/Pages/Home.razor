@@ -1,12 +1,13 @@
 ﻿@page "/"
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Temporary Title of SPLORR!!</PageTitle>
 
 <table class="pixel-grid-table" tabindex="1" @onkeydown="HandleKeyDown" @onkeydown:preventDefault="ShouldPreventDefault" autofocus>
-	@foreach(int row in Enumerable.Range(0,64))
+	@foreach (int row in Enumerable.Range(0, BUFFER_HEIGHT))
 	{
 		<tr>
-			@foreach(int column in Enumerable.Range(0,64))
+			@foreach(int column in Enumerable.Range(0,BUFFER_WIDTH))
 			{
 				<td class="pixel-grid-td" style="background-color: @GetBackgroundColor(column, row)"></td>
 			}
@@ -16,8 +17,8 @@
 
 @code{
 	IUIContext context = new UIContext(BUFFER_WIDTH, BUFFER_HEIGHT, FrameBuffer);
-	const int BUFFER_WIDTH = 64;
-	const int BUFFER_HEIGHT = 64;
+	const int BUFFER_WIDTH = 160;
+	const int BUFFER_HEIGHT = 100;
 	private bool ShouldPreventDefault = false;
 	readonly IReadOnlyList<string> Palette = new List<string>()
 	{
