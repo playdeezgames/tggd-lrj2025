@@ -1,8 +1,6 @@
 ﻿Public Class UIBuffer(Of TPixel)
     Implements IUIBuffer(Of TPixel)
 
-    Private ReadOnly columns As Integer
-    Private ReadOnly rows As Integer
     Private ReadOnly pixelBuffer As TPixel()
 
     Sub New(columns As Integer, rows As Integer, pixelBuffer As TPixel())
@@ -11,9 +9,13 @@
         Me.pixelBuffer = pixelBuffer
     End Sub
 
+    Public ReadOnly Property Columns As Integer Implements IUIBuffer(Of TPixel).Columns
+
+    Public ReadOnly Property Rows As Integer Implements IUIBuffer(Of TPixel).Rows
+
     Public Sub SetPixel(column As Integer, row As Integer, hue As TPixel) Implements IUIBuffer(Of TPixel).SetPixel
-        If column >= 0 AndAlso column < columns AndAlso row >= 0 AndAlso row < rows Then
-            pixelBuffer(column + row * columns) = hue
+        If column >= 0 AndAlso column < Columns AndAlso row >= 0 AndAlso row < Rows Then
+            pixelBuffer(column + row * Columns) = hue
         End If
     End Sub
 
