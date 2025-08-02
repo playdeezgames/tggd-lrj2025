@@ -37,6 +37,11 @@ Friend Class TitleState
     End Sub
 
     Public Function HandleCommand(command As String) As IUIState Implements IUIState.HandleCommand
-        Return Me
+        Select Case command
+            Case UI.Command.Green
+                Return New MainMenuState(buffer, world, playSfx)
+            Case Else
+                Return Me
+        End Select
     End Function
 End Class
