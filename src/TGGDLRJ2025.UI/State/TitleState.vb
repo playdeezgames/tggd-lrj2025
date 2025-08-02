@@ -1,4 +1,5 @@
-﻿Imports TGGD.UI
+﻿Imports TGGD.Business
+Imports TGGD.UI
 
 Friend Class TitleState
     Implements IUIState
@@ -23,9 +24,16 @@ Friend Class TitleState
         font.WriteCentered(buffer, buffer.Columns \ 2, 32, Hue.LightBlue, "SPLORR!!")
 
         font = Fonts.GetFont(UI.Font.CyFont3x5)
-        Dim y = buffer.Rows - font.Height
+        Dim y = buffer.Rows - font.Height * 3
+        font.WriteCentered(buffer, buffer.Columns \ 2, y, Hue.DarkGray, "lowrezjam-2025")
+        y += font.Height
+        font.WriteCentered(buffer, buffer.Columns \ 2, y, Hue.DarkGray, "TheGrumpyGameDev")
+        y += font.Height
         buffer.Fill(0, y, buffer.Columns, font.Height, Hue.LightGray)
         font.WriteCentered(buffer, buffer.Columns \ 2, y, Hue.Black, "<space>")
+
+        font = Fonts.GetFont(UI.Font.BagelQuest)
+        font.Write(buffer, 0, 0, Hue.Brown, Chr(1))
     End Sub
 
     Public Function HandleCommand(command As String) As IUIState Implements IUIState.HandleCommand

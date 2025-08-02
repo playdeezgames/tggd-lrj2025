@@ -15,6 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TGGD.Business\TGGD.Business.vbproj" />
     <ProjectReference Include="..\TGGDLRJ2025.Data\TGGDLRJ2025.Data.vbproj" />
   </ItemGroup>
 

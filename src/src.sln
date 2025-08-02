@@ -13,6 +13,16 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "TGGDLRJ2025.Business", "TGG
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "TGGDLRJ2025.Data", "TGGDLRJ2025.Data\TGGDLRJ2025.Data.vbproj", "{A37323B6-2521-483B-850B-38E84FEBEF03}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "TGGD.Business", "TGGD.Business\TGGD.Business.vbproj", "{0017434A-7610-4AFC-A6B6-E1A00E4538FE}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "FontMaker", "FontMaker\FontMaker.vbproj", "{22C8EC2B-2383-4AE7-B96A-FBD52FD4F7CC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		..\shippit.sh = ..\shippit.sh
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +49,14 @@ Global
 		{A37323B6-2521-483B-850B-38E84FEBEF03}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A37323B6-2521-483B-850B-38E84FEBEF03}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A37323B6-2521-483B-850B-38E84FEBEF03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0017434A-7610-4AFC-A6B6-E1A00E4538FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0017434A-7610-4AFC-A6B6-E1A00E4538FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0017434A-7610-4AFC-A6B6-E1A00E4538FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0017434A-7610-4AFC-A6B6-E1A00E4538FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22C8EC2B-2383-4AE7-B96A-FBD52FD4F7CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22C8EC2B-2383-4AE7-B96A-FBD52FD4F7CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22C8EC2B-2383-4AE7-B96A-FBD52FD4F7CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22C8EC2B-2383-4AE7-B96A-FBD52FD4F7CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
