@@ -5060,7 +5060,7 @@ Friend Module Fonts
         }
     Private ReadOnly dataTable As New Dictionary(Of String, FontData)
     Private ReadOnly fontTable As New Dictionary(Of String, IUIFont(Of Integer))
-    Friend Function GetFontData(fontName As String) As FontData
+    Private Function GetFontData(fontName As String) As FontData
         Dim result As FontData = Nothing
         If dataTable.TryGetValue(fontName, result) Then
             Return result

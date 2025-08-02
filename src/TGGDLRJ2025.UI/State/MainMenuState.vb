@@ -29,6 +29,6 @@ Friend Class MainMenuState
     End Function
 
     Protected Overrides Function HandleGreen(menuItemName As String) As IUIState
-        Return Me
+        Return New TutorialState(buffer, world, playSfx)
     End Function
 End Class
