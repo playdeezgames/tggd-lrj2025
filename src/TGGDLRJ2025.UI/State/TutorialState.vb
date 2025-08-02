@@ -48,7 +48,7 @@ Friend Class TutorialState
     Public Sub Refresh() Implements IUIState.Refresh
         buffer.Fill(UI.Hue.Black)
         Dim font = Fonts.GetFont(UI.Font.CyFont5x7)
-        Dim y = buffer.Rows \ 2 - stepContent.Count * font.Height \ 2
+        Dim y = (buffer.Rows - stepContent(stepIndex).Text.Count * font.Height) \ 2
         For Each line In stepContent(stepIndex).Text
             font.WriteCentered(buffer, buffer.Columns \ 2, y, UI.Hue.White, line)
             y += font.Height

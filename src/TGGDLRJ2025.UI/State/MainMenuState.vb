@@ -29,6 +29,11 @@ Friend Class MainMenuState
     End Function
 
     Protected Overrides Function HandleGreen(menuItemName As String) As IUIState
-        Return New TutorialState(buffer, world, playSfx)
+        Select Case menuItemName
+            Case TUTORIAL_NAME
+                Return New TutorialState(buffer, world, playSfx)
+            Case Else
+                Return Me
+        End Select
     End Function
 End Class
