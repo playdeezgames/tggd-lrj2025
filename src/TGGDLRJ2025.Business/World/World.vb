@@ -15,20 +15,14 @@ Public Class World
     Public Function CreateMap(mapType As String) As IMap Implements IWorld.CreateMap
         Dim mapTypeDescriptor = mapType.ToMapTypeDescriptor
         Dim mapId = data.Maps.Count
-        Dim mapData = New MapData With
+        data.Maps.Add(New MapData With
             {
                 .MapType = mapType,
                 .Columns = mapTypeDescriptor.Columns,
                 .Rows = mapTypeDescriptor.Rows,
                 .Locations = Enumerable.Range(0, mapTypeDescriptor.Columns * mapTypeDescriptor.Rows).
-                    Select(Function(x) New LocationData With
-                        {
-                            .LocationType = Nothing,
-                            .Column = x Mod mapTypeDescriptor.Columns,
-                            .Row = x \ mapTypeDescriptor.Rows
-                        }).ToList
-            }
-        data.Maps.Add(mapData)
+                    Select(Function(x) CType(Nothing, Integer?)).ToList
+            })
         Dim map = GetMap(mapId)
         mapTypeDescriptor.Initialize(map)
         Return map
@@ -40,5 +34,23 @@ Public Class World
 
     Public Function GetMap(mapId As Integer) As IMap Implements IWorld.GetMap
         Return New Map(data, mapId)
+    End Function
+
+    Public Function CreateLocation(map As IMap, column As Integer, row As Integer, locationType As String) As ILocation Implements IWorld.CreateLocation
+        Dim locationTypeDescriptor = locationType.ToLocationTypeDescriptor
+        Dim locationId = data.Locations.Count
+        data.Locations.Add(New LocationData With {
+                           .LocationType = locationType,
+                           .MapId = map.MapId,
+                           .Column = column,
+                           .Row = row})
+        Dim location = GetLocation(locationId)
+        data.Maps(map.MapId).Locations(column + row * map.Columns) = location.LocationId
+        locationTypeDescriptor.Initialize(location)
+        Return location
+    End Function
+
+    Public Function GetLocation(locationId As Integer) As ILocation Implements IWorld.GetLocation
+        Return New Location(data, locationId)
     End Function
 End Class

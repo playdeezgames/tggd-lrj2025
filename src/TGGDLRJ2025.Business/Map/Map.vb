@@ -5,14 +5,14 @@ Public Class Map
     Private ReadOnly data As WorldData
     Private ReadOnly Property MapData As MapData
         Get
-            Return data.Maps(Id)
+            Return data.Maps(MapId)
         End Get
     End Property
     Sub New(data As WorldData, id As Integer)
         Me.data = data
-        Me.Id = id
+        Me.MapId = id
     End Sub
-    Public ReadOnly Property Id As Integer Implements IMap.Id
+    Public ReadOnly Property MapId As Integer Implements IMap.MapId
 
     Public ReadOnly Property Columns As Integer Implements IMap.Columns
         Get
@@ -26,9 +26,16 @@ Public Class Map
         End Get
     End Property
 
+    Public ReadOnly Property World As IWorld Implements IMap.World
+        Get
+            Return New World(data)
+        End Get
+    End Property
+
     Public Function GetLocation(column As Integer, row As Integer) As ILocation Implements IMap.GetLocation
         If column >= 0 AndAlso column < Columns AndAlso row >= 0 AndAlso row < Rows Then
-            Return New Location(data, Id, column + row * Columns)
+            Dim locationId = MapData.Locations(column + row * Columns)
+            Return If(locationId.HasValue, New Location(data, locationId.Value), Nothing)
         End If
         Return Nothing
     End Function

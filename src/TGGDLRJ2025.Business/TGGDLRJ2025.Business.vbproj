@@ -19,4 +19,8 @@
     <ProjectReference Include="..\TGGDLRJ2025.Data\TGGDLRJ2025.Data.vbproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Character\" />
+  </ItemGroup>
+
 </Project>

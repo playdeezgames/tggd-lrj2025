@@ -14,7 +14,7 @@
                 If column = 0 OrElse row = 0 OrElse column = map.Columns - 1 OrElse row = map.Rows - 1 Then
                     locationType = Business.LocationType.BlueWall
                 End If
-                map.GetLocation(column, row).LocationType = locationType
+                map.World.CreateLocation(map, column, row, locationType)
             Next
         Next
     End Sub

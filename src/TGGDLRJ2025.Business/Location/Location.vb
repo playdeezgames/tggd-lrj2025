@@ -4,21 +4,18 @@ Friend Class Location
     Implements ILocation
 
     Private ReadOnly data As WorldData
-    Private ReadOnly mapId As Integer
-    Private ReadOnly locationIndex As Integer
+    Public ReadOnly Property LocationId As Integer Implements ILocation.LocationId
     Private ReadOnly Property LocationData As LocationData
         Get
-            Return data.Maps(mapId).Locations(locationIndex)
+            Return data.Locations(locationId)
         End Get
     End Property
 
     Public Sub New(
                   data As WorldData,
-                  mapId As Integer,
-                  locationIndex As Integer)
+                  locationId As Integer)
         Me.data = data
-        Me.mapId = mapId
-        Me.locationIndex = locationIndex
+        Me.locationId = locationId
     End Sub
 
     Public Property LocationType As String Implements ILocation.LocationType
