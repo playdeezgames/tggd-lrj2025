@@ -32,7 +32,7 @@ Friend Class TitleState
         buffer.Fill(0, y, buffer.Columns, font.Height, Hue.LightGray)
         font.WriteCentered(buffer, buffer.Columns \ 2, y, Hue.Black, "<space>")
 
-        font = Fonts.GetFont(UI.Font.BagelQuest)
+        font = Fonts.GetFont(UI.Font.BlueRoom)
         font.Write(buffer, 0, 0, Hue.Brown, Chr(1))
     End Sub
 

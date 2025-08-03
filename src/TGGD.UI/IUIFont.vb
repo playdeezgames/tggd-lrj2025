@@ -10,6 +10,7 @@
              row As Integer,
              hue As Integer,
              text As String)
-    Function GetWidth(text As String) As Integer
+    Function GetTextWidth(text As String) As Integer
     ReadOnly Property Height As Integer
+    ReadOnly Property Width As Integer
 End Interface

@@ -13,6 +13,12 @@
         End Get
     End Property
 
+    Public ReadOnly Property Width As Integer Implements IUIFont(Of TPixel).Width
+        Get
+            Return FontData.Glyphs.First.Value.Width
+        End Get
+    End Property
+
     Public Sub Write(
                     buffer As IUIBuffer(Of Integer),
                     column As Integer,
@@ -25,10 +31,10 @@
     End Sub
 
     Public Sub WriteCentered(buffer As IUIBuffer(Of Integer), column As Integer, row As Integer, hue As Integer, text As String) Implements IUIFont(Of TPixel).WriteCentered
-        Write(buffer, column - GetWidth(text) \ 2, row, hue, text)
+        Write(buffer, column - GetTextWidth(text) \ 2, row, hue, text)
     End Sub
 
-    Public Function GetWidth(text As String) As Integer Implements IUIFont(Of TPixel).GetWidth
+    Public Function GetTextWidth(text As String) As Integer Implements IUIFont(Of TPixel).GetTextWidth
         Dim result As Integer = 0
         For Each character In text
             result += FontData.Glyphs(character).Width

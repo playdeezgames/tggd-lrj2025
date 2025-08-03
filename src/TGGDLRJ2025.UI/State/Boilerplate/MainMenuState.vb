@@ -32,6 +32,9 @@ Friend Class MainMenuState
         Select Case menuItemName
             Case TUTORIAL_NAME
                 Return New TutorialState(buffer, world, playSfx)
+            Case EMBARK_NAME
+                world.Initialize()
+                Return Neutral.DetermineState(buffer, world, playSfx)
             Case Else
                 Return Me
         End Select
