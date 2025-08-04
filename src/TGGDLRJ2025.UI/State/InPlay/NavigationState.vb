@@ -25,10 +25,23 @@ Friend Class NavigationState
                 Dim location = map.GetLocation(column, row)
                 Dim x = column * font.Width
                 Dim y = row * font.Height
-                Dim properties = location.LocationType.ToLocationTypeDisplayProperties
-                font.Write(buffer, x, y, properties.Hue, properties.Glyph)
+                DrawLocation(font, location, x, y)
             Next
         Next
+    End Sub
+
+    Private Sub DrawLocation(font As IUIFont(Of Integer), location As Business.ILocation, x As Integer, y As Integer)
+        Dim properties = location.LocationType.ToLocationTypeDisplayProperties
+        font.Write(buffer, x, y, properties.Hue, properties.Glyph)
+        DrawCharacter(font, location.Character, x, y)
+    End Sub
+
+    Private Sub DrawCharacter(font As IUIFont(Of Integer), character As Business.ICharacter, x As Integer, y As Integer)
+        If character Is Nothing Then
+            Return
+        End If
+        Dim properties = character.CharacterType.ToCharacterTypeDisplayProperties
+        font.Write(buffer, x, y, properties.Hue, properties.Glyph)
     End Sub
 
     Public Function HandleCommand(command As String) As IUIState Implements IUIState.HandleCommand

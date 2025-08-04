@@ -79,6 +79,6 @@ Public Class World
     End Function
 
     Public Function GetCharacter(characterId As Integer) As ICharacter Implements IWorld.GetCharacter
-        Throw New NotImplementedException()
+        Return New Character(data, characterId)
     End Function
 End Class

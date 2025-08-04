@@ -6,6 +6,5 @@
     End Sub
 
     Friend Overrides Sub Initialize(character As ICharacter)
-        Throw New NotImplementedException()
     End Sub
 End Class

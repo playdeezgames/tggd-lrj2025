@@ -41,4 +41,11 @@ Friend Class Location
             Return New World(data)
         End Get
     End Property
+
+    Public ReadOnly Property Character As ICharacter Implements ILocation.Character
+        Get
+            Dim characterId = LocationData.CharacterId
+            Return If(characterId.HasValue, New Character(data, characterId.Value), Nothing)
+        End Get
+    End Property
 End Class

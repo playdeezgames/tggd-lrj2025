@@ -3,4 +3,5 @@
     ReadOnly Property LocationId As Integer
     ReadOnly Property Map As IMap
     ReadOnly Property World As IWorld
+    ReadOnly Property Character As ICharacter
 End Interface
