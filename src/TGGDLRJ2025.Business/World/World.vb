@@ -3,6 +3,16 @@
 Public Class World
     Implements IWorld
     Private ReadOnly data As WorldData
+
+    Public Property Avatar As ICharacter Implements IWorld.Avatar
+        Get
+            Return If(data.AvatarId.HasValue, New Character(data, data.AvatarId.Value), Nothing)
+        End Get
+        Set(value As ICharacter)
+            data.AvatarId = value?.CharacterId
+        End Set
+    End Property
+
     Sub New(data As WorldData)
         Me.data = data
     End Sub
@@ -52,5 +62,23 @@ Public Class World
 
     Public Function GetLocation(locationId As Integer) As ILocation Implements IWorld.GetLocation
         Return New Location(data, locationId)
+    End Function
+
+    Public Function CreateCharacter(characterType As String, location As ILocation) As ICharacter Implements IWorld.CreateCharacter
+        Dim characterTypeDescriptor = characterType.ToCharacterTypeDescriptor
+        Dim characterId = data.Characters.Count
+        data.Characters.Add(New CharacterData With
+                            {
+                                .CharacterType = characterType,
+                                .LocationId = location.LocationId
+                            })
+        data.Locations(location.LocationId).CharacterId = characterId
+        Dim character = GetCharacter(characterId)
+        characterTypeDescriptor.Initialize(character)
+        Return character
+    End Function
+
+    Public Function GetCharacter(characterId As Integer) As ICharacter Implements IWorld.GetCharacter
+        Throw New NotImplementedException()
     End Function
 End Class

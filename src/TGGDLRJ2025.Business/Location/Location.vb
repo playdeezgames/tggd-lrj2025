@@ -29,4 +29,16 @@ Friend Class Location
             End If
         End Set
     End Property
+
+    Public ReadOnly Property Map As IMap Implements ILocation.Map
+        Get
+            Return New Map(data, LocationData.MapId)
+        End Get
+    End Property
+
+    Public ReadOnly Property World As IWorld Implements ILocation.World
+        Get
+            Return New World(data)
+        End Get
+    End Property
 End Class

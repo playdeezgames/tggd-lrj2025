@@ -32,6 +32,12 @@ Public Class Map
         End Get
     End Property
 
+    Public ReadOnly Property Locations As IEnumerable(Of ILocation) Implements IMap.Locations
+        Get
+            Return MapData.Locations.Where(Function(x) x.HasValue).Select(Function(x) New Location(data, x.Value))
+        End Get
+    End Property
+
     Public Function GetLocation(column As Integer, row As Integer) As ILocation Implements IMap.GetLocation
         If column >= 0 AndAlso column < Columns AndAlso row >= 0 AndAlso row < Rows Then
             Dim locationId = MapData.Locations(column + row * Columns)

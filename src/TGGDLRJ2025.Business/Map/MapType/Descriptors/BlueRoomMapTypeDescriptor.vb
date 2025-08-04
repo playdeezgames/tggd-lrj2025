@@ -1,4 +1,6 @@
-﻿Friend Class BlueRoomMapTypeDescriptor
+﻿Imports TGGD.Business
+
+Friend Class BlueRoomMapTypeDescriptor
     Inherits MapTypeDescriptor
 
     Public Sub New()
@@ -17,5 +19,7 @@
                 map.World.CreateLocation(map, column, row, locationType)
             Next
         Next
+        Dim location = RNG.FromEnumerable(map.Locations.Where(Function(x) x.LocationType = LocationType.Floor))
+        map.World.Avatar = map.World.CreateCharacter(CharacterType.N00b, location)
     End Sub
 End Class

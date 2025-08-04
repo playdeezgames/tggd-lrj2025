@@ -4,4 +4,5 @@
     ReadOnly Property Rows As Integer
     Function GetLocation(column As Integer, row As Integer) As ILocation
     ReadOnly Property World As IWorld
+    ReadOnly Property Locations As IEnumerable(Of ILocation)
 End Interface
