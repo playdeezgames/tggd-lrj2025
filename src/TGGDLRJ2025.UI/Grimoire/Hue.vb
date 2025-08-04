@@ -15,4 +15,12 @@
     Public Const LightMagenta = 13
     Public Const Yellow = 14
     Public Const White = 15
+    Public Const DarkerGray = 16
+    Public Const DarkBlue = 17
+    Public Const DarkGreen = 18
+    Public Const DarkCyan = 19
+    Public Const DarkRed = 20
+    Public Const DarkMagenta = 21
+    Public Const DarkYellow = 22
+    Public Const MediumGray = 23
 End Module

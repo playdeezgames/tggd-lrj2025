@@ -6,7 +6,7 @@ Friend Class BlueRoomMapTypeDescriptor
     Public Sub New()
         MyBase.New(
             Business.MapType.BlueRoom,
-            6, 6)
+            7, 7)
     End Sub
 
     Friend Overrides Sub Initialize(map As IMap)

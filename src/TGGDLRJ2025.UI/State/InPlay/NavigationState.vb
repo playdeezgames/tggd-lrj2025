@@ -19,14 +19,25 @@ Friend Class NavigationState
 
     Public Sub Refresh() Implements IUIState.Refresh
         buffer.Fill(Hue.Black)
-        Dim map = world.GetMap(0)
         Dim font = Fonts.GetFont(UI.Font.BlueRoom)
-        For Each column In Enumerable.Range(0, map.Columns)
-            For Each row In Enumerable.Range(0, map.Rows)
-                Dim location = map.GetLocation(column, row)
-                Dim x = column * font.Width
-                Dim y = row * font.Height
-                DrawLocation(font, location, x, y)
+        Dim avatarLocation = world.Avatar.Location
+        Dim map = avatarLocation.Map
+        Dim avatarColumn = avatarLocation.Column
+        Dim avatarRow = avatarLocation.Row
+        Dim centerX = (buffer.Columns - font.Width) \ 2
+        Dim centerY = (buffer.Rows - font.Height) \ 2
+        Dim minimumColumn = -((buffer.Columns - font.Width) \ 2 + font.Width - 1) \ font.Width
+        Dim minimumRow = -((buffer.Rows - font.Height) \ 2 + font.Height - 1) \ font.Height
+        Dim renderColumns = (buffer.Columns + font.Width - 1) \ font.Width
+        Dim renderRows = (buffer.Rows + font.Height - 1) \ font.Height
+        For Each column In Enumerable.Range(minimumColumn, renderColumns)
+            For Each row In Enumerable.Range(minimumRow, renderRows)
+                Dim location = map.GetLocation(column + avatarColumn, row + avatarRow)
+                If location IsNot Nothing Then
+                    Dim x = column * font.Width + centerX
+                    Dim y = row * font.Height + centerY
+                    DrawLocation(font, location, x, y)
+                End If
             Next
         Next
     End Sub

@@ -1,7 +1,7 @@
 ﻿@page "/"
 @inject IJSRuntime JSRuntime
 
-<PageTitle>Temporary Title of SPLORR!!</PageTitle>
+<PageTitle>The Blue Room of SPLORR!!</PageTitle>
 
 <table class="pixel-grid-table" tabindex="1" @onkeydown="HandleKeyDownAsync" @onkeydown:preventDefault="ShouldPreventDefault" autofocus>
 	@foreach (int row in Enumerable.Range(0, BUFFER_HEIGHT))
@@ -38,7 +38,15 @@
 		"#f55",
 		"#f5f",
 		"#ff5",
-		"#fff"
+		"#fff",
+		"#282828",
+		"#282880",
+		"#288028",
+		"#288080",
+		"#802828",
+		"#802880",
+		"#808028",
+		"#808080"
 	};
 	readonly IReadOnlyDictionary<string, string> CommandTable = new Dictionary<string, string>()
 		{

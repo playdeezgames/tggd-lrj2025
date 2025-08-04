@@ -20,8 +20,8 @@ Friend Class MainMenuState
                 (TUTORIAL_NAME, TUTORIAL_TEXT),
                 (EMBARK_NAME, EMBARK_TEXT)
             },
-            Font.CyFont5x7,
-            Hue.LightCyan)
+            UI.Font.CyFont5x7,
+            Hue.LightGray)
     End Sub
 
     Protected Overrides Function HandleRed() As IUIState

@@ -17,7 +17,7 @@ Friend Class GameMenuState
                 (CONTINUE_NAME, CONTINUE_TEXT),
                 (ABANDON_NAME, ABANDON_TEXT)
             },
-            Font.CyFont4x6,
+            UI.Font.CyFont5x7,
             Hue.Cyan)
     End Sub
 
@@ -30,7 +30,19 @@ Friend Class GameMenuState
             Case CONTINUE_NAME
                 Return Neutral.DetermineState(buffer, world, playSfx)
             Case ABANDON_NAME
-                Return New MainMenuState(buffer, world, playSfx)
+                Return New ConfirmState(
+                    buffer,
+                    world,
+                    playSfx,
+                    "Abandon?",
+                    UI.Font.CyFont5x7,
+                    Hue.LightGray,
+                    Hue.Red,
+                    Function()
+                        world.Abandon()
+                        Return New MainMenuState(buffer, world, playSfx)
+                    End Function,
+                    Function() New GameMenuState(buffer, world, playSfx))
         End Select
         Throw New NotImplementedException()
     End Function

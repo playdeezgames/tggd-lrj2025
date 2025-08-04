@@ -6,5 +6,6 @@ Public Interface IWorld
     Function GetLocation(locationId As Integer) As ILocation
     Function CreateCharacter(characterType As String, location As ILocation) As ICharacter
     Function GetCharacter(characterId As Integer) As ICharacter
+    Sub Abandon()
     Property Avatar As ICharacter
 End Interface

@@ -40,6 +40,9 @@ Public Class World
 
     Private Sub Clear()
         data.Maps.Clear()
+        data.Characters.Clear()
+        data.Locations.Clear()
+        data.AvatarId = Nothing
     End Sub
 
     Public Function GetMap(mapId As Integer) As IMap Implements IWorld.GetMap
@@ -81,4 +84,8 @@ Public Class World
     Public Function GetCharacter(characterId As Integer) As ICharacter Implements IWorld.GetCharacter
         Return New Character(data, characterId)
     End Function
+
+    Public Sub Abandon() Implements IWorld.Abandon
+        Clear()
+    End Sub
 End Class

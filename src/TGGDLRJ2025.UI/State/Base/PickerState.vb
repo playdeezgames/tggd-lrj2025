@@ -8,8 +8,8 @@ Friend MustInherit Class PickerState
     Protected ReadOnly playSfx As Action(Of String)
     Private ReadOnly menuItems As IEnumerable(Of (Name As String, Caption As String))
     Private menuItemIndex As Integer = 0
-    Private ReadOnly font As IUIFont(Of Integer)
-    Private ReadOnly hue As Integer
+    Protected ReadOnly font As IUIFont(Of Integer)
+    Protected ReadOnly menuItemHue As Integer
 
     Public Sub New(
                   buffer As IUIBuffer(Of Integer),
@@ -17,25 +17,25 @@ Friend MustInherit Class PickerState
                   playSfx As Action(Of String),
                   menuItems As IEnumerable(Of (Name As String, Caption As String)),
                   fontName As String,
-                  hue As Integer)
+                  menuItemHue As Integer)
         Me.buffer = buffer
         Me.world = world
         Me.playSfx = playSfx
         Me.menuItems = menuItems
         Me.font = Fonts.GetFont(fontName)
-        Me.hue = hue
+        Me.menuItemHue = menuItemHue
     End Sub
 
-    Public Sub Refresh() Implements IUIState.Refresh
+    Public Overridable Sub Refresh() Implements IUIState.Refresh
         buffer.Fill(UI.Hue.Black)
         Dim y = buffer.Rows \ 2 - font.Height \ 2 - font.Height * menuItemIndex
         Dim index As Integer = 0
         For Each menuItem In menuItems
             If menuItemIndex = index Then
-                buffer.Fill(0, y, buffer.Columns, font.Height, hue)
+                buffer.Fill(0, y, buffer.Columns, font.Height, menuItemHue)
                 font.WriteCentered(buffer, buffer.Columns \ 2, y, UI.Hue.Black, menuItem.Caption)
             Else
-                font.WriteCentered(buffer, buffer.Columns \ 2, y, hue, menuItem.Caption)
+                font.WriteCentered(buffer, buffer.Columns \ 2, y, menuItemHue, menuItem.Caption)
             End If
             index += 1
             y += font.Height
