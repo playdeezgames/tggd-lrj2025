@@ -1,4 +1,5 @@
 ﻿Imports TGGD.UI
+Imports TGGDLRJ2025.Business
 
 Friend Class NavigationState
     Implements IUIState
@@ -45,6 +46,21 @@ Friend Class NavigationState
     End Sub
 
     Public Function HandleCommand(command As String) As IUIState Implements IUIState.HandleCommand
-        Return Me
+        Select Case command
+            Case UI.Command.Up
+                world.Avatar.AttemptMove(DirectionType.North)
+                Return Neutral.DetermineState(buffer, world, playSfx)
+            Case UI.Command.Down
+                world.Avatar.AttemptMove(DirectionType.South)
+                Return Neutral.DetermineState(buffer, world, playSfx)
+            Case UI.Command.Left
+                world.Avatar.AttemptMove(DirectionType.West)
+                Return Neutral.DetermineState(buffer, world, playSfx)
+            Case UI.Command.Right
+                world.Avatar.AttemptMove(DirectionType.East)
+                Return Neutral.DetermineState(buffer, world, playSfx)
+            Case Else
+                Return Me
+        End Select
     End Function
 End Class

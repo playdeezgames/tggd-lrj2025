@@ -3,5 +3,8 @@
     ReadOnly Property LocationId As Integer
     ReadOnly Property Map As IMap
     ReadOnly Property World As IWorld
-    ReadOnly Property Character As ICharacter
+    Property Character As ICharacter
+    ReadOnly Property Column As Integer
+    ReadOnly Property Row As Integer
+    Function CanEnter(character As Character) As Boolean
 End Interface

@@ -13,6 +13,19 @@ Public Class Character
         Me.CharacterId = characterId
     End Sub
 
+    Public Sub AttemptMove(directionType As String) Implements ICharacter.AttemptMove
+        Dim directionDescriptor = directionType.ToDirectionTypeDescriptor
+        Dim location = Me.Location
+        Dim nextColumn = location.Column + directionDescriptor.DeltaX
+        Dim nextRow = location.Row + directionDescriptor.DeltaY
+        Dim nextLocation = location.Map.GetLocation(nextColumn, nextRow)
+        If nextLocation IsNot Nothing Then
+            If nextLocation.CanEnter(Me) Then
+                nextLocation.Character = Me
+            End If
+        End If
+    End Sub
+
     Public ReadOnly Property CharacterType As String Implements ICharacter.CharacterType
         Get
             Return CharacterData.CharacterType

@@ -4,4 +4,5 @@
         Me.LocationType = locationType
     End Sub
     Friend MustOverride Sub Initialize(location As ILocation)
+    Friend MustOverride Function CanEnter(location As ILocation, character As ICharacter) As Boolean
 End Class
