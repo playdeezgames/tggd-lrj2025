@@ -59,6 +59,8 @@ Friend Class NavigationState
             Case UI.Command.Right
                 world.Avatar.AttemptMove(DirectionType.East)
                 Return Neutral.DetermineState(buffer, world, playSfx)
+            Case UI.Command.Red
+                Return New GameMenuState(buffer, world, playSfx)
             Case Else
                 Return Me
         End Select
