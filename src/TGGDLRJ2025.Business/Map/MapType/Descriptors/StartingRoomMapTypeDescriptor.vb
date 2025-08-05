@@ -19,7 +19,11 @@ Friend Class StartingRoomMapTypeDescriptor
             For Each row In Enumerable.Range(0, map.Rows)
                 Dim locationType = Business.LocationType.StartingRoomFloor
                 If column = 0 OrElse row = 0 OrElse column = map.Columns - 1 OrElse row = map.Rows - 1 Then
-                    locationType = Business.LocationType.GrayWall
+                    If column = MAP_COLUMNS \ 2 Or row = MAP_ROWS \ 2 Then
+                        locationType = Business.LocationType.Door
+                    Else
+                        locationType = Business.LocationType.GrayWall
+                    End If
                 End If
                 map.World.CreateLocation(map, column, row, locationType)
             Next

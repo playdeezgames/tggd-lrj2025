@@ -17,7 +17,11 @@
             For Each row In Enumerable.Range(0, map.Rows)
                 Dim locationType = Business.LocationType.EndingRoomFloor
                 If column = 0 OrElse row = 0 OrElse column = map.Columns - 1 OrElse row = map.Rows - 1 Then
-                    locationType = Business.LocationType.BlueWall
+                    If column = MAP_COLUMNS \ 2 Or row = MAP_ROWS \ 2 Then
+                        locationType = Business.LocationType.Door
+                    Else
+                        locationType = Business.LocationType.BlueWall
+                    End If
                 End If
                 map.World.CreateLocation(map, column, row, locationType)
             Next

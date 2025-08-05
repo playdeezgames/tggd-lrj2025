@@ -7,7 +7,8 @@ Friend Module LocationTypeDisplayProperties
             {Business.LocationType.StartingRoomFloor, (Chr(3), Hue.DarkerGray)},
             {Business.LocationType.BlueWall, (Chr(2), Hue.Blue)},
             {Business.LocationType.EndingRoomFloor, (Chr(2), Hue.DarkerGray)},
-            {Business.LocationType.GrayWall, (Chr(2), Hue.DarkGray)}
+            {Business.LocationType.GrayWall, (Chr(2), Hue.DarkGray)},
+            {Business.LocationType.Door, (Chr(4), Hue.Magenta)}
         }
     <Extension>
     Friend Function ToLocationTypeDisplayProperties(locationType As String) As (Glyph As Char, Hue As Integer)
