@@ -17,6 +17,12 @@ Friend Class TitleState
     Public Sub Refresh() Implements IUIState.Refresh
         buffer.Fill(Black)
         Dim font = Fonts.GetFont(UI.Font.CyFont8x8)
+        font.WriteCentered(buffer, buffer.Columns \ 2 + 1, 1, Hue.Blue, "The")
+        font.WriteCentered(buffer, buffer.Columns \ 2 + 1, 9, Hue.Blue, "Blue")
+        font.WriteCentered(buffer, buffer.Columns \ 2 + 1, 17, Hue.Blue, "Room")
+        font.WriteCentered(buffer, buffer.Columns \ 2 + 1, 25, Hue.Blue, "of")
+        font.WriteCentered(buffer, buffer.Columns \ 2 + 1, 33, Hue.Blue, "SPLORR!!")
+
         font.WriteCentered(buffer, buffer.Columns \ 2, 0, Hue.LightBlue, "The")
         font.WriteCentered(buffer, buffer.Columns \ 2, 8, Hue.LightBlue, "Blue")
         font.WriteCentered(buffer, buffer.Columns \ 2, 16, Hue.LightBlue, "Room")

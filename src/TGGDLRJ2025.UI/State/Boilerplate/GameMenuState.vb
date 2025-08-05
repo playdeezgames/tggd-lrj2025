@@ -3,9 +3,7 @@
 Friend Class GameMenuState
     Inherits PickerState
 
-    Const CONTINUE_NAME = "Continue"
     Const CONTINUE_TEXT = "Continue"
-    Const ABANDON_NAME = "Abandon"
     Const ABANDON_TEXT = "Abandon"
 
     Public Sub New(buffer As IUIBuffer(Of Integer), world As Business.IWorld, playSfx As Action(Of String))
@@ -14,8 +12,8 @@ Friend Class GameMenuState
             world,
             playSfx,
             {
-                (CONTINUE_NAME, CONTINUE_TEXT),
-                (ABANDON_NAME, ABANDON_TEXT)
+                (CONTINUE_TEXT, CONTINUE_TEXT),
+                (ABANDON_TEXT, ABANDON_TEXT)
             },
             UI.Font.CyFont5x7,
             Hue.Cyan)
@@ -27,9 +25,9 @@ Friend Class GameMenuState
 
     Protected Overrides Function HandleGreen(menuItemName As String) As IUIState
         Select Case menuItemName
-            Case CONTINUE_NAME
+            Case CONTINUE_TEXT
                 Return Neutral.DetermineState(buffer, world, playSfx)
-            Case ABANDON_NAME
+            Case ABANDON_TEXT
                 Return New ConfirmState(
                     buffer,
                     world,
