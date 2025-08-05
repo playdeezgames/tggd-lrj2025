@@ -4,11 +4,14 @@ Friend Class BlueRoomMapTypeDescriptor
     Inherits MapTypeDescriptor
     Const MAP_COLUMNS = 15
     Const MAP_ROWS = 15
+    Const MAP_COUNT = 1
 
     Public Sub New()
         MyBase.New(
             Business.MapType.StartingRoom,
-            MAP_COLUMNS, MAP_ROWS)
+            MAP_COUNT,
+            MAP_COLUMNS,
+            MAP_ROWS)
     End Sub
 
     Friend Overrides Sub Initialize(map As IMap)
