@@ -8,4 +8,5 @@
     ReadOnly Property Column As Integer
     ReadOnly Property Row As Integer
     Function CanEnter(character As Character) As Boolean
+    Sub Bump(character As Character)
 End Interface

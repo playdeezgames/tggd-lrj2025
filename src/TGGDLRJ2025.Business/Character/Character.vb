@@ -22,6 +22,8 @@ Public Class Character
         If nextLocation IsNot Nothing Then
             If nextLocation.CanEnter(Me) Then
                 nextLocation.Character = Me
+            Else
+                nextLocation.Bump(Me)
             End If
         End If
     End Sub

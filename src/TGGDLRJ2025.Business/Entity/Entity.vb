@@ -15,4 +15,12 @@ Public MustInherit Class Entity
             EntityData.Statistics.Remove(statisticType)
         End If
     End Sub
+
+    Public Function GetStatistic(statisticType As String) As Integer? Implements IEntity.GetStatistic
+        Dim statisticValue As Integer = 0
+        If EntityData.Statistics.TryGetValue(statisticType, statisticValue) Then
+            Return statisticValue
+        End If
+        Return Nothing
+    End Function
 End Class

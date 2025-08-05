@@ -25,6 +25,10 @@ Friend Class Location
         Return LocationType.ToLocationTypeDescriptor.CanEnter(Me, character)
     End Function
 
+    Public Sub Bump(character As Character) Implements ILocation.Bump
+        LocationType.ToLocationTypeDescriptor.Bump(Me, character)
+    End Sub
+
     Public Property LocationType As String Implements ILocation.LocationType
         Get
             Return LocationData.LocationType
