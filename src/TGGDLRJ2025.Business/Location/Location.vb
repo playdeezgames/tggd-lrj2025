@@ -75,4 +75,10 @@ Friend Class Location
             Return LocationData.Row
         End Get
     End Property
+
+    Protected Overrides ReadOnly Property EntityData As EntityData
+        Get
+            Return LocationData
+        End Get
+    End Property
 End Class

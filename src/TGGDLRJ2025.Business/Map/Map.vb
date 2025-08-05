@@ -38,6 +38,18 @@ Public Class Map
         End Get
     End Property
 
+    Public ReadOnly Property MapType As String Implements IMap.MapType
+        Get
+            Return MapData.MapType
+        End Get
+    End Property
+
+    Protected Overrides ReadOnly Property EntityData As EntityData
+        Get
+            Return MapData
+        End Get
+    End Property
+
     Public Function GetLocation(column As Integer, row As Integer) As ILocation Implements IMap.GetLocation
         If column >= 0 AndAlso column < Columns AndAlso row >= 0 AndAlso row < Rows Then
             Dim locationId = MapData.Locations(column + row * Columns)

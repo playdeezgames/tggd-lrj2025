@@ -13,6 +13,12 @@ Public Class World
         End Set
     End Property
 
+    Public ReadOnly Property Maps As IEnumerable(Of IMap) Implements IWorld.Maps
+        Get
+            Return Enumerable.Range(0, data.Maps.Count).Select(Function(x) GetMap(x))
+        End Get
+    End Property
+
     Sub New(data As WorldData)
         Me.data = data
     End Sub

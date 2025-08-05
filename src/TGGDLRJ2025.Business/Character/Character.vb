@@ -51,4 +51,10 @@ Public Class Character
             Return New World(data)
         End Get
     End Property
+
+    Protected Overrides ReadOnly Property EntityData As EntityData
+        Get
+            Return CharacterData
+        End Get
+    End Property
 End Class
