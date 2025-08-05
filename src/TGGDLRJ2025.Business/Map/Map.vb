@@ -1,15 +1,15 @@
 ﻿Imports TGGDLRJ2025.Data
 
 Public Class Map
+    Inherits Entity
     Implements IMap
-    Private ReadOnly data As WorldData
     Private ReadOnly Property MapData As MapData
         Get
             Return data.Maps(MapId)
         End Get
     End Property
     Sub New(data As WorldData, id As Integer)
-        Me.data = data
+        MyBase.New(data)
         Me.MapId = id
     End Sub
     Public ReadOnly Property MapId As Integer Implements IMap.MapId

@@ -1,15 +1,15 @@
 ﻿Imports TGGDLRJ2025.Data
 
 Public Class Character
+    Inherits Entity
     Implements ICharacter
-    Private data As WorldData
     Private ReadOnly Property CharacterData As CharacterData
         Get
             Return data.Characters(CharacterId)
         End Get
     End Property
     Sub New(data As WorldData, characterId As Integer)
-        Me.data = data
+        MyBase.New(data)
         Me.CharacterId = characterId
     End Sub
 

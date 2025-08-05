@@ -1,9 +1,9 @@
 ﻿Imports TGGDLRJ2025.Data
 
 Friend Class Location
+    Inherits Entity
     Implements ILocation
 
-    Private ReadOnly data As WorldData
     Public ReadOnly Property LocationId As Integer Implements ILocation.LocationId
     Private ReadOnly Property LocationData As LocationData
         Get
@@ -14,7 +14,7 @@ Friend Class Location
     Public Sub New(
                   data As WorldData,
                   locationId As Integer)
-        Me.data = data
+        MyBase.New(data)
         Me.locationId = locationId
     End Sub
 
