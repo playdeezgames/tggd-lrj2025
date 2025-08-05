@@ -8,8 +8,23 @@
         Next
         Dim startMap = world.Maps.Single(Function(x) x.MapType = MapType.StartingRoom)
         Dim endMap = world.Maps.Single(Function(x) x.MapType = MapType.EndingRoom)
-        Dim fromLocation = startMap.GetLocation(startMap.Columns \ 2, 0)
-        Dim toLocation = endMap.GetLocation(endMap.Columns \ 2, endMap.Rows - 2)
+
+        LinkMaps(startMap, endMap, DirectionType.North)
+        LinkMaps(startMap, startMap, DirectionType.East)
+        LinkMaps(startMap, startMap, DirectionType.South)
+        LinkMaps(startMap, startMap, DirectionType.West)
+
+        LinkMaps(endMap, startMap, DirectionType.North)
+        LinkMaps(endMap, startMap, DirectionType.East)
+        LinkMaps(endMap, startMap, DirectionType.South)
+        LinkMaps(endMap, startMap, DirectionType.West)
+    End Sub
+
+    Private Sub LinkMaps(fromMap As IMap, toMap As IMap, directionType As String)
+        Dim fromDoorLocation = directionType.ToDirectionTypeDescriptor.GetDoorFromLocation(fromMap)
+        Dim fromLocation = fromMap.GetLocation(fromDoorLocation.Column, fromDoorLocation.Row)
+        Dim toDoorLocation = directionType.ToDirectionTypeDescriptor.GetDoorToLocation(toMap)
+        Dim toLocation = toMap.GetLocation(toDoorLocation.Column, toDoorLocation.Row)
         fromLocation.SetStatistic(StatisticType.DestinationLocationId, toLocation.LocationId)
     End Sub
 End Module

@@ -12,17 +12,40 @@
             MAP_ROWS)
     End Sub
 
+    Private ReadOnly terrainMap As IReadOnlyList(Of String) =
+        New List(Of String) From
+        {
+            "#######+#######",
+            "#.............#",
+            "#.###########.#",
+            "#.#.........#.#",
+            "#.#.#######.#.#",
+            "#.#.#.....#.#.#",
+            "#.#.#.###.#.#.#",
+            "+.#.#.#.#.#.#.+",
+            "#.#.#.###.#.#.#",
+            "#.#.#.....#.#.#",
+            "#.#.#######.#.#",
+            "#.#.........#.#",
+            "#.###########.#",
+            "#.............#",
+            "#######+#######"
+        }
+
     Friend Overrides Sub Initialize(map As IMap)
         For Each column In Enumerable.Range(0, map.Columns)
             For Each row In Enumerable.Range(0, map.Rows)
-                Dim locationType = Business.LocationType.EndingRoomFloor
-                If column = 0 OrElse row = 0 OrElse column = map.Columns - 1 OrElse row = map.Rows - 1 Then
-                    If column = MAP_COLUMNS \ 2 Or row = MAP_ROWS \ 2 Then
-                        locationType = Business.LocationType.Door
-                    Else
-                        locationType = Business.LocationType.BlueWall
-                    End If
-                End If
+                Dim locationType As String = Nothing
+                Select Case terrainMap(row)(column)
+                    Case "."c
+                        locationType = EndingRoomFloor
+                    Case "#"c
+                        locationType = BlueWall
+                    Case "+"c
+                        locationType = Door
+                    Case Else
+                        Throw New NotImplementedException
+                End Select
                 map.World.CreateLocation(map, column, row, locationType)
             Next
         Next
