@@ -1,4 +1,4 @@
-﻿Friend Class FloorLocationTypeDescriptor
+﻿Friend Class StartingFloorLocationTypeDescriptor
     Inherits LocationTypeDescriptor
 
     Public Sub New()

@@ -4,7 +4,8 @@ Friend Module MapTypes
     Private ReadOnly Descriptors As IReadOnlyDictionary(Of String, MapTypeDescriptor) =
         New List(Of MapTypeDescriptor) From
         {
-            New BlueRoomMapTypeDescriptor()
+            New StartingRoomMapTypeDescriptor(),
+            New EndingRoomMapTypeDescriptor()
         }.ToDictionary(Function(x) x.MapType, Function(x) x)
     <Extension>
     Friend Function ToMapTypeDescriptor(mapType As String) As MapTypeDescriptor

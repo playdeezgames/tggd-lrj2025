@@ -1,6 +1,6 @@
 ﻿Imports TGGD.Business
 
-Friend Class BlueRoomMapTypeDescriptor
+Friend Class StartingRoomMapTypeDescriptor
     Inherits MapTypeDescriptor
     Const MAP_COLUMNS = 15
     Const MAP_ROWS = 15
@@ -19,7 +19,7 @@ Friend Class BlueRoomMapTypeDescriptor
             For Each row In Enumerable.Range(0, map.Rows)
                 Dim locationType = Business.LocationType.StartingRoomFloor
                 If column = 0 OrElse row = 0 OrElse column = map.Columns - 1 OrElse row = map.Rows - 1 Then
-                    locationType = Business.LocationType.BlueWall
+                    locationType = Business.LocationType.GrayWall
                 End If
                 map.World.CreateLocation(map, column, row, locationType)
             Next
