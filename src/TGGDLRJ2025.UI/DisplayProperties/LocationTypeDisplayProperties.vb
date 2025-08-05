@@ -4,7 +4,7 @@ Friend Module LocationTypeDisplayProperties
     Private ReadOnly table As IReadOnlyDictionary(Of String, (Glyph As Char, Hue As Integer)) =
         New Dictionary(Of String, (Glyph As Char, Hue As Integer)) From
         {
-            {Business.LocationType.Floor, (Chr(3), Hue.DarkerGray)},
+            {Business.LocationType.StartingRoomFloor, (Chr(3), Hue.DarkerGray)},
             {Business.LocationType.BlueWall, (Chr(2), Hue.Blue)}
         }
     <Extension>
