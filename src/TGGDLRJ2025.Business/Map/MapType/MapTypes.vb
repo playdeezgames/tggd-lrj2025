@@ -5,7 +5,8 @@ Friend Module MapTypes
         New List(Of MapTypeDescriptor) From
         {
             New StartingRoomMapTypeDescriptor(),
-            New EndingRoomMapTypeDescriptor()
+            New EndingRoomMapTypeDescriptor(),
+            New RoomMapTypeDescriptor()
         }.ToDictionary(Function(x) x.MapType, Function(x) x)
     <Extension>
     Friend Function ToMapTypeDescriptor(mapType As String) As MapTypeDescriptor
