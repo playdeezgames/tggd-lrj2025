@@ -8,7 +8,15 @@ Friend Module LocationTypes
             New EndingFloorLocationTypeDescriptor(),
             New BlueWallLocationTypeDescriptor(),
             New GrayWallLocationTypeDescriptor(),
-            New DoorLocationTypeDescriptor()
+            New DoorLocationTypeDescriptor(),
+            New SilverDoorLocationTypeDescriptor(),
+            New GoldDoorLocationTypeDescriptor(),
+            New CarneliianDoorLocationTypeDescriptor(),
+            New AmethystDoorLocationTypeDescriptor(),
+            New SapphireDoorLocationTypeDescriptor(),
+            New RubyDoorLocationTypeDescriptor(),
+            New EmeraldDoorLocationTypeDescriptor(),
+            New DiamondDoorLocationTypeDescriptor()
     }.ToDictionary(Function(x) x.LocationType, Function(x) x)
     <Extension>
     Friend Function ToLocationTypeDescriptor(locationType As String) As LocationTypeDescriptor

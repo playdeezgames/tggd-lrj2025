@@ -4,4 +4,13 @@
     Public ReadOnly BlueWall As String = NameOf(BlueWall)
     Public ReadOnly GrayWall As String = NameOf(GrayWall)
     Public ReadOnly Door As String = NameOf(Door)
+    Public ReadOnly SilverDoor As String = NameOf(SilverDoor)
+    Public ReadOnly GoldDoor As String = NameOf(GoldDoor)
+    Public ReadOnly CarnelianDoor As String = NameOf(CarnelianDoor)
+    Public ReadOnly AmethystDoor As String = NameOf(AmethystDoor)
+    Public ReadOnly SapphireDoor As String = NameOf(SapphireDoor)
+    Public ReadOnly RubyDoor As String = NameOf(RubyDoor)
+    Public ReadOnly EmeraldDoor As String = NameOf(EmeraldDoor)
+    Public ReadOnly DiamondDoor As String = NameOf(DiamondDoor)
+
 End Module
