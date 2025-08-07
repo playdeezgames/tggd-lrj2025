@@ -19,6 +19,7 @@ Friend Module WorldInitializer
         Dim path As New List(Of String)
         For Each roomIndex In Enumerable.Range(0, rooms.Count - 1)
             Dim room = rooms(roomIndex)
+            room.GetLocation(room.Columns \ 2, room.Rows \ 2).SetStatistic(StatisticType.RoomNumber, roomIndex + 1)
             Dim nextRoomIndex = roomIndex + 1
             Dim nextRoom = rooms(nextRoomIndex)
             Dim direction As String = Nothing

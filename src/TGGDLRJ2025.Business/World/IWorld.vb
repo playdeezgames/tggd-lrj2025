@@ -8,5 +8,6 @@ Public Interface IWorld
     Function CreateCharacter(characterType As String, location As ILocation) As ICharacter
     Function GetCharacter(characterId As Integer) As ICharacter
     Sub Abandon()
+    Sub AddMessage(lines As IEnumerable(Of (Mood As String, Text As String)))
     Property Avatar As ICharacter
 End Interface

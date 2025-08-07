@@ -94,4 +94,15 @@ Public Class World
     Public Sub Abandon() Implements IWorld.Abandon
         Clear()
     End Sub
+
+    Public Sub AddMessage(lines As IEnumerable(Of (Mood As String, Text As String))) Implements IWorld.AddMessage
+        data.Messages.Add(New MessageData With
+                          {
+                            .Lines = lines.Select(Function(x) New MessageLineData With
+                                                      {
+                                                        .Mood = x.Mood,
+                                                        .Text = x.Text
+                                                      }).ToList
+                          })
+    End Sub
 End Class

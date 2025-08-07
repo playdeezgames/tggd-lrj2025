@@ -28,6 +28,12 @@ Public Class Character
         End If
     End Sub
 
+    Public Sub AddMessage(lines As IEnumerable(Of (Mood As String, Text As String))) Implements ICharacter.AddMessage
+        If IsAvatar Then
+            World.AddMessage(lines)
+        End If
+    End Sub
+
     Public ReadOnly Property CharacterType As String Implements ICharacter.CharacterType
         Get
             Return CharacterData.CharacterType
@@ -57,6 +63,12 @@ Public Class Character
     Protected Overrides ReadOnly Property EntityData As EntityData
         Get
             Return CharacterData
+        End Get
+    End Property
+
+    Public ReadOnly Property IsAvatar As Boolean Implements ICharacter.IsAvatar
+        Get
+            Return data.AvatarId.HasValue AndAlso data.AvatarId.Value = CharacterId
         End Get
     End Property
 End Class
