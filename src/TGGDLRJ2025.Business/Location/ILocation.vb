@@ -1,6 +1,6 @@
 ﻿Public Interface ILocation
     Inherits IEntity
-    ReadOnly Property LocationType As String
+    Property LocationType As String
     ReadOnly Property LocationId As Integer
     ReadOnly Property Map As IMap
     ReadOnly Property World As IWorld
