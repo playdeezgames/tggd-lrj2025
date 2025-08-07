@@ -22,6 +22,8 @@
                     Else
                         locationType = Business.LocationType.GrayWall
                     End If
+                ElseIf column = MAP_COLUMNS \ 2 AndAlso row = MAP_ROWS \ 2 Then
+                    locationType = Sign
                 End If
                 map.World.CreateLocation(map, column, row, locationType)
             Next
