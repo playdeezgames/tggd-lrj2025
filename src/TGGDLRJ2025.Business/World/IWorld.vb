@@ -9,5 +9,8 @@ Public Interface IWorld
     Function GetCharacter(characterId As Integer) As ICharacter
     Sub Abandon()
     Sub AddMessage(lines As IEnumerable(Of (Mood As String, Text As String)))
+    ReadOnly Property CurrentMessage As IMessage
+    Sub DismissMessage()
     Property Avatar As ICharacter
+    ReadOnly Property HasMessages As Boolean
 End Interface

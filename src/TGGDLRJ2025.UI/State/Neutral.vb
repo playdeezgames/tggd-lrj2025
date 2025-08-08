@@ -6,6 +6,10 @@ Friend Module Neutral
                                   buffer As IUIBuffer(Of Integer),
                                   world As IWorld,
                                   playSfx As Action(Of String)) As IUIState
-        Return New NavigationState(buffer, world, playSfx)
+        If world.HasMessages Then
+            Return New MessageState(buffer, world, playSfx)
+        Else
+            Return New NavigationState(buffer, world, playSfx)
+        End If
     End Function
 End Module

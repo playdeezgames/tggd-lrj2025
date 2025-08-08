@@ -19,6 +19,21 @@ Public Class World
         End Get
     End Property
 
+    Public ReadOnly Property HasMessages As Boolean Implements IWorld.HasMessages
+        Get
+            Return data.Messages.Any
+        End Get
+    End Property
+
+    Public ReadOnly Property CurrentMessage As IMessage Implements IWorld.CurrentMessage
+        Get
+            If HasMessages Then
+                Return New Message(data)
+            End If
+            Return Nothing
+        End Get
+    End Property
+
     Sub New(data As WorldData)
         Me.data = data
     End Sub
@@ -104,5 +119,11 @@ Public Class World
                                                         .Text = x.Text
                                                       }).ToList
                           })
+    End Sub
+
+    Public Sub DismissMessage() Implements IWorld.DismissMessage
+        If HasMessages Then
+            data.Messages.RemoveAt(0)
+        End If
     End Sub
 End Class
