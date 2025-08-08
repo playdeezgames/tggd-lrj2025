@@ -19,6 +19,23 @@ Friend Class NavigationState
 
     Public Sub Refresh() Implements IUIState.Refresh
         buffer.Fill(Hue.Black)
+        DrawMap()
+        DrawStatistics()
+    End Sub
+
+    Private Sub DrawStatistics()
+        Dim font = Fonts.GetFont(UI.Font.CyFont3x5)
+        Dim x As Integer = 0
+        Dim y As Integer = buffer.Rows - font.Height
+        Dim avatar = world.Avatar
+        Dim text = $"H{avatar.GetStatistic(Business.StatisticType.Health):d3} "
+        font.Write(buffer, x, y, Hue.Red, text)
+        x += font.GetTextWidth(text)
+        text = $"S{avatar.GetStatistic(Business.StatisticType.Satiety):d3}"
+        font.Write(buffer, x, y, Hue.Magenta, text)
+    End Sub
+
+    Private Sub DrawMap()
         Dim font = Fonts.GetFont(UI.Font.BlueRoom)
         Dim avatarLocation = world.Avatar.Location
         Dim map = avatarLocation.Map

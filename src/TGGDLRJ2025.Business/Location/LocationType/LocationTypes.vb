@@ -16,7 +16,7 @@ Friend Module LocationTypes
             New SapphireDoorLocationTypeDescriptor(),
             New RubyDoorLocationTypeDescriptor(),
             New EmeraldDoorLocationTypeDescriptor(),
-            New DiamondDoorLocationTypeDescriptor(),
+            New FinalSignLocationTypeDescriptor(),
             New SignLocationTypeDescriptor()
     }.ToDictionary(Function(x) x.LocationType, Function(x) x)
     <Extension>

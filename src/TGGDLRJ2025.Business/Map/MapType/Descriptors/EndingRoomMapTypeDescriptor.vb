@@ -45,7 +45,7 @@
             {"5"c, SapphireDoor},
             {"6"c, RubyDoor},
             {"7"c, EmeraldDoor},
-            {"!"c, DiamondDoor}
+            {"!"c, FinalSign}
         }
 
     Friend Overrides Sub Initialize(map As IMap)
@@ -55,5 +55,6 @@
                 map.World.CreateLocation(map, column, row, locationType)
             Next
         Next
+
     End Sub
 End Class

@@ -16,7 +16,7 @@ Friend Module LocationTypeDisplayProperties
             {Business.LocationType.SapphireDoor, (Chr(4), Hue.Blue)},
             {Business.LocationType.RubyDoor, (Chr(4), Hue.LightRed)},
             {Business.LocationType.EmeraldDoor, (Chr(4), Hue.LightGreen)},
-            {Business.LocationType.DiamondDoor, (Chr(4), Hue.LightCyan)},
+            {Business.LocationType.FinalSign, (Chr(6), Hue.Brown)},
             {Business.LocationType.Sign, (Chr(6), Hue.Brown)}
         }
     <Extension>

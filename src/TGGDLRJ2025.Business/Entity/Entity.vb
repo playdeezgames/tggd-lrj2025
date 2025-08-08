@@ -19,8 +19,43 @@ Public MustInherit Class Entity
     Public Function GetStatistic(statisticType As String) As Integer? Implements IEntity.GetStatistic
         Dim statisticValue As Integer = 0
         If EntityData.Statistics.TryGetValue(statisticType, statisticValue) Then
-            Return statisticValue
+            Return Math.Clamp(
+                statisticValue,
+                GetStatisticMinimum(statisticType),
+                GetStatisticMaximum(statisticType))
         End If
         Return Nothing
+    End Function
+
+    Public Sub SetStatisticMinimum(statisticType As String, minimumValue As Integer?) Implements IEntity.SetStatisticMinimum
+        If minimumValue.HasValue Then
+            EntityData.StatisticMinimums(statisticType) = minimumValue.Value
+        Else
+            EntityData.StatisticMinimums.Remove(statisticType)
+        End If
+    End Sub
+
+    Public Sub SetStatisticMaximum(statisticType As String, maximumValue As Integer?) Implements IEntity.SetStatisticMaximum
+        If maximumValue.HasValue Then
+            EntityData.StatisticMaximums(statisticType) = maximumValue.Value
+        Else
+            EntityData.StatisticMaximums.Remove(statisticType)
+        End If
+    End Sub
+
+    Public Function GetStatisticMaximum(statisticType As String) As Integer Implements IEntity.GetStatisticMaximum
+        Dim result As Integer = Integer.MaxValue
+        If EntityData.StatisticMaximums.TryGetValue(statisticType, result) Then
+            Return result
+        End If
+        Return result
+    End Function
+
+    Public Function GetStatisticMinimum(statisticType As String) As Integer Implements IEntity.GetStatisticMinimum
+        Dim result As Integer = Integer.MinValue
+        If EntityData.StatisticMinimums.TryGetValue(statisticType, result) Then
+            Return result
+        End If
+        Return result
     End Function
 End Class

@@ -23,6 +23,7 @@ Friend Class MessageState
         Dim y = (buffer.Rows - font.Height * message.LineCount) \ 2
         For Each line In message.Lines
             font.WriteCentered(buffer, buffer.Columns \ 2, y, UI.Hue.LightGray, line.Text)
+            y += font.Height
         Next
     End Sub
 

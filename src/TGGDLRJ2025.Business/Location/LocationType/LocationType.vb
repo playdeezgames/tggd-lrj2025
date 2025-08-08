@@ -11,6 +11,6 @@
     Public ReadOnly SapphireDoor As String = NameOf(SapphireDoor)
     Public ReadOnly RubyDoor As String = NameOf(RubyDoor)
     Public ReadOnly EmeraldDoor As String = NameOf(EmeraldDoor)
-    Public ReadOnly DiamondDoor As String = NameOf(DiamondDoor)
+    Public ReadOnly FinalSign As String = NameOf(FinalSign)
     Public ReadOnly Sign As String = NameOf(Sign)
 End Module
