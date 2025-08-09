@@ -95,4 +95,10 @@ Friend Class Location
             Return LocationData.CharacterId.HasValue
         End Get
     End Property
+
+    Public ReadOnly Property Items As IEnumerable(Of IItem) Implements ILocation.Items
+        Get
+            Return LocationData.ItemIds.Select(Function(x) New Item(data, x))
+        End Get
+    End Property
 End Class

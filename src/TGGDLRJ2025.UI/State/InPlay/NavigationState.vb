@@ -62,7 +62,19 @@ Friend Class NavigationState
     Private Sub DrawLocation(font As IUIFont(Of Integer), location As Business.ILocation, x As Integer, y As Integer)
         Dim properties = location.LocationType.ToLocationTypeDisplayProperties
         font.Write(buffer, x, y, properties.Hue, properties.Glyph)
+        DrawItems(font, location.Items, x, y)
         DrawCharacter(font, location.Character, x, y)
+    End Sub
+
+    Private Sub DrawItems(font As IUIFont(Of Integer), items As IEnumerable(Of IItem), x As Integer, y As Integer)
+        For Each item In items
+            DrawItem(font, item, x, y)
+        Next
+    End Sub
+
+    Private Sub DrawItem(font As IUIFont(Of Integer), item As IItem, x As Integer, y As Integer)
+        Dim properties = item.ItemType.ToItemTypeDisplayProperties
+        font.Write(buffer, x, y, properties.Hue, properties.Glyph)
     End Sub
 
     Private Sub DrawCharacter(font As IUIFont(Of Integer), character As Business.ICharacter, x As Integer, y As Integer)

@@ -11,4 +11,5 @@
     Sub Bump(character As Character)
     Sub AddItem(item As IItem)
     ReadOnly Property HasCharacter As Boolean
+    ReadOnly Property Items As IEnumerable(Of IItem)
 End Interface
