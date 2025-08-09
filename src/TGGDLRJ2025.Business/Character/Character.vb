@@ -22,6 +22,7 @@ Public Class Character
         If nextLocation IsNot Nothing Then
             If nextLocation.CanEnter(Me) Then
                 nextLocation.Character = Me
+                CharacterType.ToCharacterTypeDescriptor.OnMove(Me)
             Else
                 nextLocation.Bump(Me)
             End If
@@ -69,6 +70,12 @@ Public Class Character
     Public ReadOnly Property IsAvatar As Boolean Implements ICharacter.IsAvatar
         Get
             Return data.AvatarId.HasValue AndAlso data.AvatarId.Value = CharacterId
+        End Get
+    End Property
+
+    Public ReadOnly Property IsDead As Boolean Implements ICharacter.IsDead
+        Get
+            Return GetStatistic(StatisticType.Health).Value = GetStatisticMinimum(StatisticType.Health)
         End Get
     End Property
 End Class

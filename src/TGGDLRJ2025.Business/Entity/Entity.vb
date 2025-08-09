@@ -48,7 +48,7 @@ Public MustInherit Class Entity
         If EntityData.StatisticMaximums.TryGetValue(statisticType, result) Then
             Return result
         End If
-        Return result
+        Return Integer.MaxValue
     End Function
 
     Public Function GetStatisticMinimum(statisticType As String) As Integer Implements IEntity.GetStatisticMinimum
@@ -56,6 +56,11 @@ Public MustInherit Class Entity
         If EntityData.StatisticMinimums.TryGetValue(statisticType, result) Then
             Return result
         End If
-        Return result
+        Return Integer.MinValue
+    End Function
+
+    Public Function ChangeStatistic(statisticType As String, delta As Integer) As Integer? Implements IEntity.ChangeStatistic
+        SetStatistic(statisticType, If(GetStatistic(statisticType), 0) + delta)
+        Return GetStatistic(statisticType)
     End Function
 End Class

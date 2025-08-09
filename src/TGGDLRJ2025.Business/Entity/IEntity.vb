@@ -5,4 +5,5 @@
     Function GetStatisticMaximum(statisticType As String) As Integer
     Function GetStatisticMinimum(statisticType As String) As Integer
     Function GetStatistic(statisticType As String) As Integer?
+    Function ChangeStatistic(statisticType As String, delta As Integer) As Integer?
 End Interface

@@ -14,6 +14,15 @@
         character.SetStatisticMaximum(StatisticType.Satiety, 100)
     End Sub
 
+    Friend Overrides Sub OnMove(character As ICharacter)
+        Dim starving = character.GetStatistic(StatisticType.Satiety) <= character.GetStatisticMinimum(StatisticType.Satiety)
+        If starving Then
+            character.ChangeStatistic(StatisticType.Health, -1)
+        Else
+            character.ChangeStatistic(StatisticType.Satiety, -1)
+        End If
+    End Sub
+
     Friend Overrides Function CanSpawn(location As ILocation) As Boolean
         Return location.LocationType = Business.LocationType.StartingRoomFloor
     End Function
