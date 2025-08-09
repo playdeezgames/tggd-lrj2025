@@ -13,4 +13,6 @@ Public Interface IWorld
     Sub DismissMessage()
     Property Avatar As ICharacter
     ReadOnly Property HasMessages As Boolean
+    Function CreateItem(itemType As String) As IItem
+    Function GetItem(itemId As Integer) As IItem
 End Interface

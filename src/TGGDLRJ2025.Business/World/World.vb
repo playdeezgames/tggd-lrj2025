@@ -126,4 +126,19 @@ Public Class World
             data.Messages.RemoveAt(0)
         End If
     End Sub
+
+    Public Function CreateItem(itemType As String) As IItem Implements IWorld.CreateItem
+        Dim itemId As Integer = data.Items.Count
+        data.Items.Add(New ItemData With
+                       {
+                            .ItemType = itemType
+                       })
+        Dim item = GetItem(itemId)
+        itemType.ToItemTypeDescriptor.Initialize(item)
+        Return item
+    End Function
+
+    Public Function GetItem(itemId As Integer) As IItem Implements IWorld.GetItem
+        Return New Item(data, itemId)
+    End Function
 End Class

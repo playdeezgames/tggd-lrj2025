@@ -9,4 +9,6 @@
     ReadOnly Property Row As Integer
     Function CanEnter(character As Character) As Boolean
     Sub Bump(character As Character)
+    Sub AddItem(item As IItem)
+    ReadOnly Property HasCharacter As Boolean
 End Interface

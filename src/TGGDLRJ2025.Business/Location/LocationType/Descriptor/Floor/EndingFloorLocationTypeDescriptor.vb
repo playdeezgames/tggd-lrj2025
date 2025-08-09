@@ -2,7 +2,7 @@
     Inherits LocationTypeDescriptor
 
     Public Sub New()
-        MyBase.New(Business.LocationType.EndingRoomFloor)
+        MyBase.New(Business.LocationType.EndingRoomFloor, False)
     End Sub
 
     Friend Overrides Sub Initialize(location As ILocation)

@@ -2,7 +2,7 @@
     Inherits LocationTypeDescriptor
 
     Public Sub New()
-        MyBase.New(Business.LocationType.FinalSign)
+        MyBase.New(Business.LocationType.FinalSign, True)
     End Sub
 
     Friend Overrides Sub Initialize(location As ILocation)

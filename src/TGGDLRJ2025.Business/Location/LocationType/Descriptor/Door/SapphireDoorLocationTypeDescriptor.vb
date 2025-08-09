@@ -2,7 +2,7 @@
     Inherits LocationTypeDescriptor
 
     Public Sub New()
-        MyBase.New(Business.LocationType.SapphireDoor)
+        MyBase.New(Business.LocationType.SapphireDoor, True)
     End Sub
 
     Friend Overrides Sub Initialize(location As ILocation)

@@ -29,6 +29,10 @@ Friend Class Location
         LocationType.ToLocationTypeDescriptor.Bump(Me, character)
     End Sub
 
+    Public Sub AddItem(item As IItem) Implements ILocation.AddItem
+        LocationData.ItemIds.Add(item.ItemId)
+    End Sub
+
     Public Property LocationType As String Implements ILocation.LocationType
         Get
             Return LocationData.LocationType
@@ -83,6 +87,12 @@ Friend Class Location
     Protected Overrides ReadOnly Property EntityData As EntityData
         Get
             Return LocationData
+        End Get
+    End Property
+
+    Public ReadOnly Property HasCharacter As Boolean Implements ILocation.HasCharacter
+        Get
+            Return LocationData.CharacterId.HasValue
         End Get
     End Property
 End Class
