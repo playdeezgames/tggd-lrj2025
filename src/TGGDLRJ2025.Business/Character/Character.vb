@@ -1,7 +1,7 @@
 ﻿Imports TGGDLRJ2025.Data
 
 Public Class Character
-    Inherits Entity
+    Inherits InventoriedEntity
     Implements ICharacter
     Private ReadOnly Property CharacterData As CharacterData
         Get
@@ -76,6 +76,12 @@ Public Class Character
     Public ReadOnly Property IsDead As Boolean Implements ICharacter.IsDead
         Get
             Return GetStatistic(StatisticType.Health).Value = GetStatisticMinimum(StatisticType.Health)
+        End Get
+    End Property
+
+    Public Overrides ReadOnly Property InventoriedEntityData As InventoriedEntityData
+        Get
+            Return CharacterData
         End Get
     End Property
 End Class

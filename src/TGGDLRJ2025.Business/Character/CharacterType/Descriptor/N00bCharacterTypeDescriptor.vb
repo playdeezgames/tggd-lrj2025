@@ -21,6 +21,12 @@
         Else
             character.ChangeStatistic(StatisticType.Satiety, -1)
         End If
+        Dim location = character.Location
+        Dim items = location.Items.ToList
+        For Each item In items
+            character.AddItem(item)
+            location.RemoveItem(item)
+        Next
     End Sub
 
     Friend Overrides Function CanSpawn(location As ILocation) As Boolean

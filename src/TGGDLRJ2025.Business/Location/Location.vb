@@ -1,7 +1,7 @@
 ﻿Imports TGGDLRJ2025.Data
 
 Friend Class Location
-    Inherits Entity
+    Inherits InventoriedEntity
     Implements ILocation
 
     Public ReadOnly Property LocationId As Integer Implements ILocation.LocationId
@@ -27,10 +27,6 @@ Friend Class Location
 
     Public Sub Bump(character As Character) Implements ILocation.Bump
         LocationType.ToLocationTypeDescriptor.Bump(Me, character)
-    End Sub
-
-    Public Sub AddItem(item As IItem) Implements ILocation.AddItem
-        LocationData.ItemIds.Add(item.ItemId)
     End Sub
 
     Public Property LocationType As String Implements ILocation.LocationType
@@ -96,9 +92,9 @@ Friend Class Location
         End Get
     End Property
 
-    Public ReadOnly Property Items As IEnumerable(Of IItem) Implements ILocation.Items
+    Public Overrides ReadOnly Property InventoriedEntityData As InventoriedEntityData
         Get
-            Return LocationData.ItemIds.Select(Function(x) New Item(data, x))
+            Return LocationData
         End Get
     End Property
 End Class
