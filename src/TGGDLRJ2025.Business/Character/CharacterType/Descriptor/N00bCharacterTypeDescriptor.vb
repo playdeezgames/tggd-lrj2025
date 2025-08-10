@@ -28,7 +28,7 @@
         Dim location = character.Location
         Dim items = location.Items.ToList
         For Each item In items
-            Dim sfx = item.PickUpSfx
+            character.World.PlaySfx(item.PickUpSfx)
             character.AddItem(item)
             location.RemoveItem(item)
         Next

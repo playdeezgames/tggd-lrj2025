@@ -13,9 +13,9 @@ Friend Class Location
 
     Public Sub New(
                   data As WorldData,
-                  sfxQueue As Queue(Of String),
+                  playSfx As Action(Of String),
                   locationId As Integer)
-        MyBase.New(data, sfxQueue)
+        MyBase.New(data, playSfx)
         Me.LocationId = locationId
     End Sub
 
@@ -44,20 +44,20 @@ Friend Class Location
 
     Public ReadOnly Property Map As IMap Implements ILocation.Map
         Get
-            Return New Map(data, sfxQueue, LocationData.MapId)
+            Return New Map(data, playSfx, LocationData.MapId)
         End Get
     End Property
 
     Public ReadOnly Property World As IWorld Implements ILocation.World
         Get
-            Return New World(data, sfxQueue)
+            Return New World(data, playSfx)
         End Get
     End Property
 
     Public Property Character As ICharacter Implements ILocation.Character
         Get
             Dim characterId = LocationData.CharacterId
-            Return If(characterId.HasValue, New Character(data, sfxQueue, characterId.Value), Nothing)
+            Return If(characterId.HasValue, New Character(data, playSfx, characterId.Value), Nothing)
         End Get
         Set(value As ICharacter)
             Dim characterId = value.CharacterId

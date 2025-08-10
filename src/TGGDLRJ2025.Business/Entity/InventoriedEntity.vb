@@ -4,14 +4,14 @@ Public MustInherit Class InventoriedEntity
     Inherits Entity
     Implements IInventoriedEntity
 
-    Protected Sub New(data As WorldData, sfxQueue As Queue(Of String))
-        MyBase.New(data, sfxQueue)
+    Protected Sub New(data As WorldData, playSfx As Action(Of String))
+        MyBase.New(data, playSfx)
     End Sub
     MustOverride ReadOnly Property InventoriedEntityData As InventoriedEntityData
 
     Public ReadOnly Property Items As IEnumerable(Of IItem) Implements IInventoriedEntity.Items
         Get
-            Return InventoriedEntityData.ItemIds.Select(Function(x) New Item(data, sfxQueue, x))
+            Return InventoriedEntityData.ItemIds.Select(Function(x) New Item(data, playSfx, x))
         End Get
     End Property
 

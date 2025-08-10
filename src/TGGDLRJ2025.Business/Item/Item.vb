@@ -4,8 +4,8 @@ Public Class Item
     Inherits Entity
     Implements IItem
 
-    Public Sub New(data As WorldData, sfxQueue As Queue(Of String), itemId As Integer)
-        MyBase.New(data, sfxQueue)
+    Public Sub New(data As WorldData, playSfx As Action(Of String), itemId As Integer)
+        MyBase.New(data, playSfx)
         Me.ItemId = itemId
     End Sub
     Private ReadOnly Property ItemData As ItemData

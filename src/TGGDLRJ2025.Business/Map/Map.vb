@@ -8,8 +8,8 @@ Public Class Map
             Return data.Maps(MapId)
         End Get
     End Property
-    Sub New(data As WorldData, sfxQueue As Queue(Of String), id As Integer)
-        MyBase.New(data, sfxQueue)
+    Sub New(data As WorldData, playSfx As Action(Of String), id As Integer)
+        MyBase.New(data, playSfx)
         Me.MapId = id
     End Sub
     Public ReadOnly Property MapId As Integer Implements IMap.MapId
@@ -28,13 +28,13 @@ Public Class Map
 
     Public ReadOnly Property World As IWorld Implements IMap.World
         Get
-            Return New World(data, sfxQueue)
+            Return New World(data, playSfx)
         End Get
     End Property
 
     Public ReadOnly Property Locations As IEnumerable(Of ILocation) Implements IMap.Locations
         Get
-            Return MapData.Locations.Where(Function(x) x.HasValue).Select(Function(x) New Location(data, sfxQueue, x.Value))
+            Return MapData.Locations.Where(Function(x) x.HasValue).Select(Function(x) New Location(data, playSfx, x.Value))
         End Get
     End Property
 
@@ -53,7 +53,7 @@ Public Class Map
     Public Function GetLocation(column As Integer, row As Integer) As ILocation Implements IMap.GetLocation
         If column >= 0 AndAlso column < Columns AndAlso row >= 0 AndAlso row < Rows Then
             Dim locationId = MapData.Locations(column + row * Columns)
-            Return If(locationId.HasValue, New Location(data, sfxQueue, locationId.Value), Nothing)
+            Return If(locationId.HasValue, New Location(data, playSfx, locationId.Value), Nothing)
         End If
         Return Nothing
     End Function

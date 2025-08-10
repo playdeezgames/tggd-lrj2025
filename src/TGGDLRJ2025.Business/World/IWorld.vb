@@ -15,4 +15,5 @@ Public Interface IWorld
     ReadOnly Property HasMessages As Boolean
     Function CreateItem(itemType As String) As IItem
     Function GetItem(itemId As Integer) As IItem
+    Sub PlaySfx(sfx As String)
 End Interface
