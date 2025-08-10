@@ -17,7 +17,11 @@
     Friend Overrides Sub OnMove(character As ICharacter)
         Dim starving = character.GetStatistic(StatisticType.Satiety) <= character.GetStatisticMinimum(StatisticType.Satiety)
         If starving Then
-            character.ChangeStatistic(StatisticType.Health, -1)
+            If character.GetItemTypeCount(ItemType.Food) > 0 Then
+                character.UseItem(character.GetItemOfType(ItemType.Food))
+            Else
+                character.ChangeStatistic(StatisticType.Health, -1)
+            End If
         Else
             character.ChangeStatistic(StatisticType.Satiety, -1)
         End If

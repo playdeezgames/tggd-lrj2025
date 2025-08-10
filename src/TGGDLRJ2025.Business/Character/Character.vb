@@ -25,6 +25,7 @@ Public Class Character
                 CharacterType.ToCharacterTypeDescriptor.OnMove(Me)
             Else
                 nextLocation.Bump(Me)
+                CharacterType.ToCharacterTypeDescriptor.OnMove(Me)
             End If
         End If
     End Sub
@@ -33,6 +34,11 @@ Public Class Character
         If IsAvatar Then
             World.AddMessage(lines)
         End If
+    End Sub
+
+    Public Sub UseItem(item As IItem) Implements ICharacter.UseItem
+        Dim descriptor = item.ItemType.ToItemTypeDescriptor
+        descriptor.OnUse(item, Me)
     End Sub
 
     Public ReadOnly Property CharacterType As String Implements ICharacter.CharacterType

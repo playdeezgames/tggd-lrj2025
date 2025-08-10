@@ -19,16 +19,17 @@
         End Get
     End Property
 
-    Public Sub Write(
+    Public Function Write(
                     buffer As IUIBuffer(Of Integer),
                     column As Integer,
                     row As Integer,
                     hue As Integer,
-                    text As String) Implements IUIFont(Of TPixel).Write
+                    text As String) As Integer Implements IUIFont(Of TPixel).Write
         For Each character In text
             column = WriteGlyph(buffer, column, row, hue, character)
         Next
-    End Sub
+        Return column
+    End Function
 
     Public Sub WriteCentered(buffer As IUIBuffer(Of Integer), column As Integer, row As Integer, hue As Integer, text As String) Implements IUIFont(Of TPixel).WriteCentered
         Write(buffer, column - GetTextWidth(text) \ 2, row, hue, text)

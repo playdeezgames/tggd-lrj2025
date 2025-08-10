@@ -7,4 +7,5 @@
     End Sub
     MustOverride Function CanSpawn(location As ILocation) As Boolean
     MustOverride Sub Initialize(item As IItem)
+    MustOverride Sub OnUse(item As IItem, character As ICharacter)
 End Class

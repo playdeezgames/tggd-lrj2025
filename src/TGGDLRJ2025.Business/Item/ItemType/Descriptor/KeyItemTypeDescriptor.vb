@@ -8,6 +8,10 @@
     Public Overrides Sub Initialize(item As IItem)
     End Sub
 
+    Public Overrides Sub OnUse(item As IItem, character As ICharacter)
+        character.RemoveItem(item)
+    End Sub
+
     Public Overrides Function CanSpawn(Location As ILocation) As Boolean
         Dim locationDescriptor = Location.LocationType.ToLocationTypeDescriptor
         If locationDescriptor.IsSolid Then

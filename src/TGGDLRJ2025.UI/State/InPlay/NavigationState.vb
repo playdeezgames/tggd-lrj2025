@@ -26,13 +26,14 @@ Friend Class NavigationState
     Private Sub DrawStatistics()
         Dim font = Fonts.GetFont(UI.Font.CyFont3x5)
         Dim x As Integer = 0
-        Dim y As Integer = buffer.Rows - font.Height
+        Dim y As Integer = 0
         Dim avatar = world.Avatar
         Dim text = $"H{avatar.GetStatistic(Business.StatisticType.Health):d3} "
-        font.Write(buffer, x, y, Hue.Red, text)
-        x += font.GetTextWidth(text)
-        text = $"S{avatar.GetStatistic(Business.StatisticType.Satiety):d3}"
-        font.Write(buffer, x, y, Hue.Magenta, text)
+        x = font.Write(buffer, x, y, Hue.Red, text)
+        text = $"S{avatar.GetStatistic(Business.StatisticType.Satiety):d3} "
+        x = font.Write(buffer, x, y, Hue.Magenta, text)
+        text = $"F{avatar.GetItemTypeCount(ItemType.Food)}"
+        font.Write(buffer, x, y, Hue.DarkBlue, text)
     End Sub
 
     Private Sub DrawMap()

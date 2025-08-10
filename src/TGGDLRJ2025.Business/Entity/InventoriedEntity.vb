@@ -22,4 +22,12 @@ Public MustInherit Class InventoriedEntity
     Public Sub RemoveItem(item As IItem) Implements IInventoriedEntity.RemoveItem
         InventoriedEntityData.ItemIds.Remove(item.ItemId)
     End Sub
+
+    Public Function GetItemTypeCount(itemType As String) As Integer Implements IInventoriedEntity.GetItemTypeCount
+        Return Items.Count(Function(x) x.ItemType = itemType)
+    End Function
+
+    Public Function GetItemOfType(itemType As String) As IItem Implements IInventoriedEntity.GetItemOfType
+        Return Items.FirstOrDefault(Function(x) x.ItemType = itemType)
+    End Function
 End Class
