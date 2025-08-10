@@ -4,8 +4,8 @@ Public Class Item
     Inherits Entity
     Implements IItem
 
-    Public Sub New(data As WorldData, itemId As Integer)
-        MyBase.New(data)
+    Public Sub New(data As WorldData, sfxQueue As Queue(Of String), itemId As Integer)
+        MyBase.New(data, sfxQueue)
         Me.ItemId = itemId
     End Sub
     Private ReadOnly Property ItemData As ItemData
@@ -26,6 +26,12 @@ Public Class Item
     Protected Overrides ReadOnly Property EntityData As EntityData
         Get
             Return ItemData
+        End Get
+    End Property
+
+    Public ReadOnly Property PickUpSfx As String Implements IItem.PickUpSfx
+        Get
+            Return ItemType.ToItemTypeDescriptor.PickUpSfx
         End Get
     End Property
 End Class

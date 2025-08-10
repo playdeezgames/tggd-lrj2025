@@ -2,7 +2,7 @@
     Inherits ItemTypeDescriptor
 
     Public Sub New(itemType As String)
-        MyBase.New(itemType, 1)
+        MyBase.New(itemType, 1, Sfx.Take)
     End Sub
 
     Public Overrides Sub Initialize(item As IItem)

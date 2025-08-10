@@ -8,8 +8,8 @@ Public Class Character
             Return data.Characters(CharacterId)
         End Get
     End Property
-    Sub New(data As WorldData, characterId As Integer)
-        MyBase.New(data)
+    Sub New(data As WorldData, sfxQueue As Queue(Of String), characterId As Integer)
+        MyBase.New(data, sfxQueue)
         Me.CharacterId = characterId
     End Sub
 
@@ -51,7 +51,7 @@ Public Class Character
 
     Public ReadOnly Property Location As ILocation Implements ICharacter.Location
         Get
-            Return New Location(data, CharacterData.LocationId)
+            Return New Location(data, sfxQueue, CharacterData.LocationId)
         End Get
     End Property
 
@@ -63,7 +63,7 @@ Public Class Character
 
     Public ReadOnly Property World As IWorld Implements ICharacter.World
         Get
-            Return New World(data)
+            Return New World(data, sfxQueue)
         End Get
     End Property
 

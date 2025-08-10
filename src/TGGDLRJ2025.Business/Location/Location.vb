@@ -13,9 +13,10 @@ Friend Class Location
 
     Public Sub New(
                   data As WorldData,
+                  sfxQueue As Queue(Of String),
                   locationId As Integer)
-        MyBase.New(data)
-        Me.locationId = locationId
+        MyBase.New(data, sfxQueue)
+        Me.LocationId = locationId
     End Sub
 
     Public Function CanEnter(character As Character) As Boolean Implements ILocation.CanEnter
@@ -43,20 +44,20 @@ Friend Class Location
 
     Public ReadOnly Property Map As IMap Implements ILocation.Map
         Get
-            Return New Map(data, LocationData.MapId)
+            Return New Map(data, sfxQueue, LocationData.MapId)
         End Get
     End Property
 
     Public ReadOnly Property World As IWorld Implements ILocation.World
         Get
-            Return New World(data)
+            Return New World(data, sfxQueue)
         End Get
     End Property
 
     Public Property Character As ICharacter Implements ILocation.Character
         Get
             Dim characterId = LocationData.CharacterId
-            Return If(characterId.HasValue, New Character(data, characterId.Value), Nothing)
+            Return If(characterId.HasValue, New Character(data, sfxQueue, characterId.Value), Nothing)
         End Get
         Set(value As ICharacter)
             Dim characterId = value.CharacterId

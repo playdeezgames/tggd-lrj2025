@@ -9,7 +9,7 @@ Public Class UIContext
     Private ReadOnly sfxQueue As New Queue(Of String)
     Private ReadOnly Property World As IWorld
         Get
-            Return New World(worldData)
+            Return New World(worldData, sfxQueue)
         End Get
     End Property
     Private state As IUIState = Nothing

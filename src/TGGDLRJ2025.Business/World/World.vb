@@ -3,10 +3,11 @@
 Public Class World
     Implements IWorld
     Private ReadOnly data As WorldData
+    Private ReadOnly sfxQueue As New Queue(Of String)
 
     Public Property Avatar As ICharacter Implements IWorld.Avatar
         Get
-            Return If(data.AvatarId.HasValue, New Character(data, data.AvatarId.Value), Nothing)
+            Return If(data.AvatarId.HasValue, New Character(data, sfxQueue, data.AvatarId.Value), Nothing)
         End Get
         Set(value As ICharacter)
             data.AvatarId = value?.CharacterId
@@ -34,8 +35,9 @@ Public Class World
         End Get
     End Property
 
-    Sub New(data As WorldData)
+    Sub New(data As WorldData, sfxQueue As Queue(Of String))
         Me.data = data
+        Me.sfxQueue = sfxQueue
     End Sub
 
     Public Sub Initialize() Implements IWorld.Initialize
@@ -67,7 +69,7 @@ Public Class World
     End Sub
 
     Public Function GetMap(mapId As Integer) As IMap Implements IWorld.GetMap
-        Return New Map(data, mapId)
+        Return New Map(data, sfxQueue, mapId)
     End Function
 
     Public Function CreateLocation(map As IMap, column As Integer, row As Integer, locationType As String) As ILocation Implements IWorld.CreateLocation
@@ -85,7 +87,7 @@ Public Class World
     End Function
 
     Public Function GetLocation(locationId As Integer) As ILocation Implements IWorld.GetLocation
-        Return New Location(data, locationId)
+        Return New Location(data, sfxQueue, locationId)
     End Function
 
     Public Function CreateCharacter(characterType As String, location As ILocation) As ICharacter Implements IWorld.CreateCharacter
@@ -103,7 +105,7 @@ Public Class World
     End Function
 
     Public Function GetCharacter(characterId As Integer) As ICharacter Implements IWorld.GetCharacter
-        Return New Character(data, characterId)
+        Return New Character(data, sfxQueue, characterId)
     End Function
 
     Public Sub Abandon() Implements IWorld.Abandon
@@ -139,6 +141,6 @@ Public Class World
     End Function
 
     Public Function GetItem(itemId As Integer) As IItem Implements IWorld.GetItem
-        Return New Item(data, itemId)
+        Return New Item(data, sfxQueue, itemId)
     End Function
 End Class

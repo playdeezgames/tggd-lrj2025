@@ -3,9 +3,11 @@
 Public MustInherit Class Entity
     Implements IEntity
     Protected ReadOnly data As WorldData
+    Protected ReadOnly sfxQueue As Queue(Of String)
     Protected MustOverride ReadOnly Property EntityData As EntityData
-    Sub New(data As WorldData)
+    Sub New(data As WorldData, sfxQueue As Queue(Of String))
         Me.data = data
+        Me.sfxQueue = sfxQueue
     End Sub
 
     Public Sub SetStatistic(statisticType As String, statisticValue As Integer?) Implements IEntity.SetStatistic
