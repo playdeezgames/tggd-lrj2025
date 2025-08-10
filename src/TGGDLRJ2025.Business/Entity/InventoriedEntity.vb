@@ -30,4 +30,8 @@ Public MustInherit Class InventoriedEntity
     Public Function GetItemOfType(itemType As String) As IItem Implements IInventoriedEntity.GetItemOfType
         Return Items.FirstOrDefault(Function(x) x.ItemType = itemType)
     End Function
+
+    Public Function HasItemType(itemType As String) As Boolean Implements IInventoriedEntity.HasItemType
+        Return Items.Any(Function(x) x.ItemType = itemType)
+    End Function
 End Class

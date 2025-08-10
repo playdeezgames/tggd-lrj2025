@@ -1,18 +1,7 @@
 ﻿Friend Class RubyDoorLocationTypeDescriptor
-    Inherits LocationTypeDescriptor
+    Inherits LockedDoorLocationTypeDescriptor
 
     Public Sub New()
-        MyBase.New(Business.LocationType.RubyDoor, True)
+        MyBase.New(Business.LocationType.RubyDoor, True, EndingRoomFloor, RubyKey)
     End Sub
-
-    Friend Overrides Sub Initialize(location As ILocation)
-    End Sub
-
-    Friend Overrides Sub Bump(location As ILocation, character As ICharacter)
-        location.LocationType = Business.LocationType.EndingRoomFloor
-    End Sub
-
-    Friend Overrides Function CanEnter(location As ILocation, character As ICharacter) As Boolean
-        Return False
-    End Function
 End Class

@@ -5,4 +5,5 @@
     Sub RemoveItem(item As IItem)
     Function GetItemTypeCount(itemType As String) As Integer
     Function GetItemOfType(itemType As String) As IItem
+    Function HasItemType(itemType As String) As Boolean
 End Interface

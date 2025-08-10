@@ -18,6 +18,7 @@
         Dim starving = character.GetStatistic(StatisticType.Satiety) <= character.GetStatisticMinimum(StatisticType.Satiety)
         If starving Then
             If character.GetItemTypeCount(ItemType.Food) > 0 Then
+                character.World.PlaySfx(Sfx.Eat)
                 character.UseItem(character.GetItemOfType(ItemType.Food))
             Else
                 character.ChangeStatistic(StatisticType.Health, -1)
