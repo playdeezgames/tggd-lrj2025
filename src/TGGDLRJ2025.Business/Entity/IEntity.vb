@@ -6,4 +6,6 @@
     Function GetStatisticMinimum(statisticType As String) As Integer
     Function GetStatistic(statisticType As String) As Integer?
     Function ChangeStatistic(statisticType As String, delta As Integer) As Integer?
+    Function HasTag(tagType As String) As Boolean
+    Sub SetTag(tagType As String)
 End Interface

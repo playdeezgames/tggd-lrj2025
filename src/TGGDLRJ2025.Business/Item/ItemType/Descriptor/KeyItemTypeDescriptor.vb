@@ -6,6 +6,7 @@
     End Sub
 
     Public Overrides Sub Initialize(item As IItem)
+        item.SetTag(TagType.Key)
     End Sub
 
     Public Overrides Sub OnUse(item As IItem, character As ICharacter)

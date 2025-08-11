@@ -65,4 +65,12 @@ Public MustInherit Class Entity
         SetStatistic(statisticType, If(GetStatistic(statisticType), 0) + delta)
         Return GetStatistic(statisticType)
     End Function
+
+    Public Function HasTag(tagType As String) As Boolean Implements IEntity.HasTag
+        Return EntityData.Tags.Contains(tagType)
+    End Function
+
+    Public Sub SetTag(tagType As String) Implements IEntity.SetTag
+        EntityData.Tags.Add(tagType)
+    End Sub
 End Class

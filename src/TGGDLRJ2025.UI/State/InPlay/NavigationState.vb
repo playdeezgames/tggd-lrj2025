@@ -21,6 +21,18 @@ Friend Class NavigationState
         buffer.Fill(Hue.Black)
         DrawMap()
         DrawStatistics()
+        DrawKeys()
+    End Sub
+
+    Private Sub DrawKeys()
+        Dim font = Fonts.GetFont(UI.Font.BlueRoom)
+        Dim x As Integer = buffer.Rows - font.Height * 5 \ 4
+        Dim y As Integer = 0
+        Dim keyItems = world.Avatar.Items.Where(Function(z) z.HasTag(TagType.Key))
+        For Each keyItem In keyItems
+            DrawItem(font, keyItem, x, y)
+            y += font.Height \ 2
+        Next
     End Sub
 
     Private Sub DrawStatistics()
