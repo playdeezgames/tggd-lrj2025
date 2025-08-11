@@ -15,7 +15,7 @@
     Friend Overrides Sub Initialize(map As IMap)
         For Each column In Enumerable.Range(0, map.Columns)
             For Each row In Enumerable.Range(0, map.Rows)
-                Dim locationType = Business.LocationType.StartingRoomFloor
+                Dim locationType = Business.LocationType.RoomFloor
                 If column = 0 OrElse row = 0 OrElse column = map.Columns - 1 OrElse row = map.Rows - 1 Then
                     If column = MAP_COLUMNS \ 2 Or row = MAP_ROWS \ 2 Then
                         locationType = Business.LocationType.Door

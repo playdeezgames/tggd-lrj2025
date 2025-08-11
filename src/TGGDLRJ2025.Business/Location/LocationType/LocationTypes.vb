@@ -5,6 +5,7 @@ Friend Module LocationTypes
         New List(Of LocationTypeDescriptor) From
         {
             New StartingFloorLocationTypeDescriptor(),
+            New FloorLocationTypeDescriptor(),
             New EndingFloorLocationTypeDescriptor(),
             New BlueWallLocationTypeDescriptor(),
             New GrayWallLocationTypeDescriptor(),

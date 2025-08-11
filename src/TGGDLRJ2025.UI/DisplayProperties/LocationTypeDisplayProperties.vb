@@ -5,6 +5,7 @@ Friend Module LocationTypeDisplayProperties
         New Dictionary(Of String, (Glyph As Char, Hue As Integer)) From
         {
             {Business.LocationType.StartingRoomFloor, (Chr(3), Hue.DarkerGray)},
+            {Business.LocationType.RoomFloor, (Chr(3), Hue.DarkerGray)},
             {Business.LocationType.BlueWall, (Chr(2), Hue.Blue)},
             {Business.LocationType.EndingRoomFloor, (Chr(3), Hue.DarkerGray)},
             {Business.LocationType.GrayWall, (Chr(2), Hue.DarkGray)},

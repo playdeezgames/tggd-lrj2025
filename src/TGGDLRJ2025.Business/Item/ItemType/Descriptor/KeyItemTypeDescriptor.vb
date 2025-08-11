@@ -20,6 +20,7 @@
         If Location.HasCharacter Then
             Return False
         End If
+        Return Location.LocationType = LocationType.RoomFloor
         Return True
     End Function
 End Class
