@@ -16,6 +16,25 @@ Public Class Character
     Public Sub AttemptMove(directionType As String) Implements ICharacter.AttemptMove
         Dim directionDescriptor = directionType.ToDirectionTypeDescriptor
         Dim location = Me.Location
+        Dim nextColumn = location.Column + directionDescriptor.DeltaX
+        Dim nextRow = location.Row + directionDescriptor.DeltaY
+        Dim nextLocation = location.Map.GetLocation(nextColumn, nextRow)
+        If nextLocation IsNot Nothing Then
+            If nextLocation.HasCharacter Then
+                Interact(nextLocation.Character, False)
+            ElseIf nextLocation.CanEnter(Me) Then
+                HandleThreats(location)
+                nextLocation.Character = Me
+                CharacterType.ToCharacterTypeDescriptor.OnMove(Me)
+            Else
+                HandleThreats(location)
+                nextLocation.Bump(Me)
+                CharacterType.ToCharacterTypeDescriptor.OnMove(Me)
+            End If
+        End If
+    End Sub
+
+    Private Sub HandleThreats(location As ILocation)
         If location.Threatens(Me) Then
             For Each directionType In DirectionTypes.All
                 Dim neighbor = location.GetNeighbor(directionType)
@@ -26,20 +45,6 @@ Public Class Character
                     End If
                 End If
             Next
-        End If
-        Dim nextColumn = location.Column + directionDescriptor.DeltaX
-        Dim nextRow = location.Row + directionDescriptor.DeltaY
-        Dim nextLocation = location.Map.GetLocation(nextColumn, nextRow)
-        If nextLocation IsNot Nothing Then
-            If nextLocation.HasCharacter Then
-                Interact(nextLocation.Character, False)
-            ElseIf nextLocation.CanEnter(Me) Then
-                nextLocation.Character = Me
-                CharacterType.ToCharacterTypeDescriptor.OnMove(Me)
-            Else
-                nextLocation.Bump(Me)
-                CharacterType.ToCharacterTypeDescriptor.OnMove(Me)
-            End If
         End If
     End Sub
 

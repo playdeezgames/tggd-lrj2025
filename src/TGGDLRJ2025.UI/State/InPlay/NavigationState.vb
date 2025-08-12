@@ -81,7 +81,7 @@ Friend Class NavigationState
     End Sub
 
     Private Sub DrawThreat(font As IUIFont(Of Integer), location As ILocation, x As Integer, y As Integer)
-        If location.Threatens(world.Avatar) Then
+        If Not location.IsSolid AndAlso location.Threatens(world.Avatar) Then
             font.Write(buffer, x, y, Hue.DarkRed, Chr(12))
         End If
     End Sub

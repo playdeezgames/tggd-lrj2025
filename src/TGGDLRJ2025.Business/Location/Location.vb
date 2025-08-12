@@ -120,4 +120,10 @@ Friend Class Location
             Return LocationData
         End Get
     End Property
+
+    Public ReadOnly Property IsSolid As Boolean Implements ILocation.IsSolid
+        Get
+            Return LocationType.ToLocationTypeDescriptor.IsSolid
+        End Get
+    End Property
 End Class

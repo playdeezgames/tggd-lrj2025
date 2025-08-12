@@ -12,4 +12,5 @@
     ReadOnly Property HasCharacter As Boolean
     Function Threatens(character As ICharacter) As Boolean
     Function GetNeighbor(directionType As String) As ILocation
+    ReadOnly Property IsSolid As Boolean
 End Interface
