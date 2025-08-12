@@ -4,7 +4,23 @@ Friend Module WorldInitializer
     Friend Sub Initialize(world As IWorld)
         InitializeMaps(world)
         InitializeMaze(world)
+        InitializeCharacters(world)
         InitializeItems(world)
+    End Sub
+
+    Private Sub InitializeCharacters(world As IWorld)
+        For Each characterType In CharacterTypes.All
+            InitializeCharacterType(world, characterType)
+        Next
+    End Sub
+
+    Private Sub InitializeCharacterType(world As IWorld, characterType As String)
+        Dim descriptor = characterType.ToCharacterTypeDescriptor
+        For Each dummy In Enumerable.Range(0, descriptor.CharacterCount)
+            Dim map = RNG.FromEnumerable(world.Maps.Where(Function(x) x.Locations.Any(Function(y) descriptor.CanSpawn(y))))
+            Dim location = RNG.FromEnumerable(map.Locations.Where(Function(x) descriptor.CanSpawn(x)))
+            world.CreateCharacter(characterType, location)
+        Next
     End Sub
 
     Private Sub InitializeItems(world As IWorld)

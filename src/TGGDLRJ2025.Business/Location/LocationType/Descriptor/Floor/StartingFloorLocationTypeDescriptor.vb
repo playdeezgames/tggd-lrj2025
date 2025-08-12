@@ -9,7 +9,6 @@
     End Sub
 
     Friend Overrides Sub Bump(location As ILocation, character As ICharacter)
-        Throw New NotImplementedException()
     End Sub
 
     Friend Overrides Function CanEnter(location As ILocation, character As ICharacter) As Boolean
