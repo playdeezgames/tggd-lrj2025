@@ -76,7 +76,14 @@ Friend Class NavigationState
         Dim properties = location.LocationType.ToLocationTypeDisplayProperties
         font.Write(buffer, x, y, properties.Hue, properties.Glyph)
         DrawItems(font, location.Items, x, y)
+        DrawThreat(font, location, x, y)
         DrawCharacter(font, location.Character, x, y)
+    End Sub
+
+    Private Sub DrawThreat(font As IUIFont(Of Integer), location As ILocation, x As Integer, y As Integer)
+        If location.Threatens(world.Avatar) Then
+            font.Write(buffer, x, y, Hue.DarkRed, Chr(12))
+        End If
     End Sub
 
     Private Sub DrawItems(font As IUIFont(Of Integer), items As IEnumerable(Of IItem), x As Integer, y As Integer)

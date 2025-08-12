@@ -16,6 +16,17 @@ Public Class Character
     Public Sub AttemptMove(directionType As String) Implements ICharacter.AttemptMove
         Dim directionDescriptor = directionType.ToDirectionTypeDescriptor
         Dim location = Me.Location
+        If location.Threatens(Me) Then
+            For Each directionType In DirectionTypes.All
+                Dim neighbor = location.GetNeighbor(directionType)
+                If neighbor?.HasCharacter Then
+                    neighbor.Character.Interact(Me, True)
+                    If IsDead Then
+                        Return
+                    End If
+                End If
+            Next
+        End If
         Dim nextColumn = location.Column + directionDescriptor.DeltaX
         Dim nextRow = location.Row + directionDescriptor.DeltaY
         Dim nextLocation = location.Map.GetLocation(nextColumn, nextRow)

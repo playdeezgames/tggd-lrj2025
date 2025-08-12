@@ -30,6 +30,24 @@ Friend Class Location
         LocationType.ToLocationTypeDescriptor.Bump(Me, character)
     End Sub
 
+    Public Function Threatens(character As ICharacter) As Boolean Implements ILocation.Threatens
+        For Each directionType In DirectionTypes.All
+            Dim neighbor = GetNeighbor(directionType)
+            If neighbor IsNot Nothing Then
+                Dim otherCharacter = neighbor.Character
+                If otherCharacter IsNot Nothing AndAlso otherCharacter.CharacterId <> character.CharacterId Then
+                    Return True
+                End If
+            End If
+        Next
+        Return False
+    End Function
+
+    Public Function GetNeighbor(directionType As String) As ILocation Implements ILocation.GetNeighbor
+        Dim descriptor = directionType.ToDirectionTypeDescriptor
+        Return Map.GetLocation(Column + descriptor.DeltaX, Row + descriptor.DeltaY)
+    End Function
+
     Public Property LocationType As String Implements ILocation.LocationType
         Get
             Return LocationData.LocationType

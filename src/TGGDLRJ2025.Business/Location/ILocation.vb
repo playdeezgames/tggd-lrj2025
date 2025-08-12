@@ -10,4 +10,6 @@
     Function CanEnter(character As Character) As Boolean
     Sub Bump(character As Character)
     ReadOnly Property HasCharacter As Boolean
+    Function Threatens(character As ICharacter) As Boolean
+    Function GetNeighbor(directionType As String) As ILocation
 End Interface
