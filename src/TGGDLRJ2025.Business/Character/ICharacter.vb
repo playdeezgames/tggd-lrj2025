@@ -10,4 +10,6 @@
     ReadOnly Property IsAvatar As Boolean
     ReadOnly Property IsDead As Boolean
     Sub UseItem(item As IItem)
+    Sub Interact(otherCharacter As ICharacter, isCounter As Boolean)
+    ReadOnly Property Name As String
 End Interface

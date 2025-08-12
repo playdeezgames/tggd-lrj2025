@@ -2,7 +2,7 @@
     Inherits CharacterTypeDescriptor
 
     Public Sub New()
-        MyBase.New(Business.CharacterType.N00b, 0)
+        MyBase.New(Business.CharacterType.N00b, 0, "N00b")
     End Sub
 
     Friend Overrides Sub Initialize(character As ICharacter)
@@ -12,6 +12,8 @@
         character.SetStatistic(StatisticType.Satiety, 100)
         character.SetStatisticMinimum(StatisticType.Satiety, 0)
         character.SetStatisticMaximum(StatisticType.Satiety, 100)
+        character.SetStatistic(StatisticType.Attack, 10)
+        character.SetStatistic(StatisticType.Defend, 5)
     End Sub
 
     Friend Overrides Sub OnMove(character As ICharacter)

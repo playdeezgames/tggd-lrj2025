@@ -60,12 +60,16 @@ Friend Class Location
             Return If(characterId.HasValue, New Character(data, playSfx, characterId.Value), Nothing)
         End Get
         Set(value As ICharacter)
-            Dim characterId = value.CharacterId
-            Dim characterData = data.Characters(characterId)
-            Dim oldLocationData = data.Locations(characterData.LocationId)
-            oldLocationData.CharacterId = Nothing
-            LocationData.CharacterId = characterId
-            characterData.LocationId = LocationId
+            If value IsNot Nothing Then
+                Dim characterId = value.CharacterId
+                Dim characterData = data.Characters(characterId)
+                Dim oldLocationData = data.Locations(characterData.LocationId)
+                oldLocationData.CharacterId = Nothing
+                LocationData.CharacterId = characterId
+                characterData.LocationId = LocationId
+            Else
+                LocationData.CharacterId = Nothing
+            End If
         End Set
     End Property
 

@@ -20,7 +20,9 @@ Public Class Character
         Dim nextRow = location.Row + directionDescriptor.DeltaY
         Dim nextLocation = location.Map.GetLocation(nextColumn, nextRow)
         If nextLocation IsNot Nothing Then
-            If nextLocation.CanEnter(Me) Then
+            If nextLocation.HasCharacter Then
+                Interact(nextLocation.Character, False)
+            ElseIf nextLocation.CanEnter(Me) Then
                 nextLocation.Character = Me
                 CharacterType.ToCharacterTypeDescriptor.OnMove(Me)
             Else
@@ -39,6 +41,10 @@ Public Class Character
     Public Sub UseItem(item As IItem) Implements ICharacter.UseItem
         Dim descriptor = item.ItemType.ToItemTypeDescriptor
         descriptor.OnUse(item, Me)
+    End Sub
+
+    Public Sub Interact(otherCharacter As ICharacter, isCounter As Boolean) Implements ICharacter.Interact
+        CharacterType.ToCharacterTypeDescriptor.OnInteract(Me, otherCharacter, isCounter)
     End Sub
 
     Public ReadOnly Property CharacterType As String Implements ICharacter.CharacterType
@@ -88,6 +94,12 @@ Public Class Character
     Public Overrides ReadOnly Property InventoriedEntityData As InventoriedEntityData
         Get
             Return CharacterData
+        End Get
+    End Property
+
+    Public ReadOnly Property Name As String Implements ICharacter.Name
+        Get
+            Return CharacterType.ToCharacterTypeDescriptor.Name
         End Get
     End Property
 End Class
