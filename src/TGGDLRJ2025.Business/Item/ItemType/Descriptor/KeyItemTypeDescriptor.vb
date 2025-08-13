@@ -2,7 +2,7 @@
     Inherits ItemTypeDescriptor
 
     Public Sub New(itemType As String)
-        MyBase.New(itemType, 1, Sfx.Take)
+        MyBase.New(itemType, 1, Sfx.Yoink)
     End Sub
 
     Public Overrides Sub Initialize(item As IItem)
@@ -22,6 +22,5 @@
             Return False
         End If
         Return Location.LocationType = LocationType.RoomFloor
-        Return True
     End Function
 End Class

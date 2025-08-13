@@ -7,4 +7,7 @@
     Public ReadOnly RubyKey As String = NameOf(RubyKey)
     Public ReadOnly EmeraldKey As String = NameOf(EmeraldKey)
     Public ReadOnly Food As String = NameOf(Food)
+    Public ReadOnly Sword As String = NameOf(Sword)
+    Public ReadOnly Shield As String = NameOf(Shield)
+    Public ReadOnly Potion As String = NameOf(Potion)
 End Module

@@ -11,7 +11,10 @@ Public Module ItemTypes
             New KeyItemTypeDescriptor(ItemType.SapphireKey),
             New KeyItemTypeDescriptor(ItemType.RubyKey),
             New KeyItemTypeDescriptor(ItemType.EmeraldKey),
-            New FoodItemTypeDescriptor()
+            New FoodItemTypeDescriptor(),
+            New SwordItemTypeDescriptor(),
+            New ShieldItemTypeDescriptor(),
+            New PotionItemTypeDescriptor()
         }.ToDictionary(Function(x) x.ItemType, Function(x) x)
     <Extension>
     Friend Function ToItemTypeDescriptor(itemType As String) As ItemTypeDescriptor
