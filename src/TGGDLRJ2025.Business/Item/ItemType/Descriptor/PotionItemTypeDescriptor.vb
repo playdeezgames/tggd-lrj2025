@@ -11,6 +11,9 @@
     Public Overrides Sub OnUse(item As IItem, character As ICharacter)
     End Sub
 
+    Public Overrides Sub OnTake(item As Item, character As ICharacter)
+    End Sub
+
     Public Overrides Function CanSpawn(location As ILocation) As Boolean
         Dim locationDescriptor = location.LocationType.ToLocationTypeDescriptor
         If locationDescriptor.IsSolid Then

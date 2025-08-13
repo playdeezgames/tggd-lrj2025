@@ -8,6 +8,11 @@ Public Class Item
         MyBase.New(data, playSfx)
         Me.ItemId = itemId
     End Sub
+
+    Public Sub Take(character As ICharacter) Implements IItem.Take
+        ItemType.ToItemTypeDescriptor.OnTake(Me, character)
+    End Sub
+
     Private ReadOnly Property ItemData As ItemData
         Get
             Return data.Items(ItemId)

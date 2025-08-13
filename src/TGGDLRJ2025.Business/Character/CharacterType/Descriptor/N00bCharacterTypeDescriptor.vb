@@ -34,6 +34,7 @@
             character.World.PlaySfx(item.PickUpSfx)
             character.AddItem(item)
             location.RemoveItem(item)
+            item.Take(character)
         Next
     End Sub
 

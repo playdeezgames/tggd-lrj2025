@@ -13,6 +13,26 @@
     Public Overrides Sub OnUse(item As IItem, character As ICharacter)
         character.ChangeStatistic(StatisticType.Satiety, FOOD_SATIETY_BENEFIT)
         character.RemoveItem(item)
+        If Not character.HasTag(TagType.EatMessage) Then
+            character.SetTag(TagType.EatMessage)
+            character.AddMessage({
+                    (Mood.Info, "Hungry?"),
+                    (Mood.Info, "Blueberries"),
+                    (Mood.Info, "satisfy!")
+                })
+        End If
+    End Sub
+
+    Public Overrides Sub OnTake(item As Item, character As ICharacter)
+        If Not character.HasTag(TagType.FoodMessage) Then
+            character.SetTag(TagType.FoodMessage)
+            character.AddMessage({
+                    (Mood.Info, "Blueberry"),
+                    (Mood.Info, "(fer when"),
+                    (Mood.Info, "yer"),
+                    (Mood.Info, "hungry!)")
+                })
+        End If
     End Sub
 
     Public Overrides Function CanSpawn(location As ILocation) As Boolean
