@@ -2,7 +2,7 @@
     Inherits ItemTypeDescriptor
 
     Public Sub New()
-        MyBase.New(Business.ItemType.Shield, 0, Sfx.Yoink)
+        MyBase.New(Business.ItemType.Shield, 0, 0, 10, 5, Sfx.Yoink)
     End Sub
 
     Public Overrides Sub Initialize(item As IItem)

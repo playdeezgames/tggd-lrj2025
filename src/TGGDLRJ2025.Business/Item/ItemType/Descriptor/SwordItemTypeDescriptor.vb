@@ -2,7 +2,13 @@
     Inherits ItemTypeDescriptor
 
     Public Sub New()
-        MyBase.New(Business.ItemType.Sword, 0, Sfx.Yoink)
+        MyBase.New(
+            Business.ItemType.Sword,
+            25,
+            20,
+            0,
+            5,
+            Sfx.Yoink)
     End Sub
 
     Public Overrides Sub Initialize(item As IItem)
@@ -12,6 +18,25 @@
     End Sub
 
     Public Overrides Sub OnTake(item As Item, character As ICharacter)
+        If character.GetStatistic(StatisticType.SwordDurability) <= character.GetStatisticMinimum(StatisticType.SwordDurability) Then
+            character.SetStatistic(StatisticType.SwordDurability, item.ItemType.ToItemTypeDescriptor.Durability)
+            character.RemoveItem(item)
+            character.SetStatistic(StatisticType.Attack, item.ItemType.ToItemTypeDescriptor.Attack)
+            character.AddMessage(
+                Nothing,
+                {
+                    (Mood.Info, "You got"),
+                    (Mood.Info, "a sword!")
+                })
+        Else
+            character.AddMessage(
+                Nothing,
+                {
+                    (Mood.Info, "Good to"),
+                    (Mood.Info, "have a"),
+                    (Mood.Info, "back-up!")
+                })
+        End If
     End Sub
 
     Public Overrides Function CanSpawn(location As ILocation) As Boolean
