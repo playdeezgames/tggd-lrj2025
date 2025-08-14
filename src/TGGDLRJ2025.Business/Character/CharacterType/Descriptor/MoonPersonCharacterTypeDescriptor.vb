@@ -2,7 +2,13 @@
     Inherits CharacterTypeDescriptor
 
     Public Sub New()
-        MyBase.New(Business.CharacterType.MoonPerson, 20, "Moonie")
+        MyBase.New(
+            Business.CharacterType.MoonPerson,
+            40,
+            "Moonie",
+            Sfx.EnemyHit,
+            Sfx.EnemyMiss,
+            Sfx.EnemyDeath)
     End Sub
 
     Friend Overrides Sub Initialize(character As ICharacter)

@@ -9,7 +9,7 @@
     End Sub
 
     Friend Overrides Sub Bump(location As ILocation, character As ICharacter)
-        character.AddMessage({(Mood.Info, $"Have you"), (Mood.Info, $"checked"), (Mood.Info, $"yer"), (Mood.Info, $"butthole?")})
+        character.AddMessage(Nothing, {(Mood.Info, $"Have you"), (Mood.Info, $"checked"), (Mood.Info, $"yer"), (Mood.Info, $"butthole?")})
         'TODO: you have won the game
     End Sub
 

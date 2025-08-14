@@ -2,7 +2,13 @@
     Inherits CharacterTypeDescriptor
 
     Public Sub New()
-        MyBase.New(Business.CharacterType.N00b, 0, "N00b")
+        MyBase.New(
+            Business.CharacterType.N00b,
+            0,
+            "N00b",
+            Sfx.PlayerHit,
+            Sfx.PlayerMiss,
+            Sfx.PlayerDeath)
     End Sub
 
     Friend Overrides Sub Initialize(character As ICharacter)

@@ -15,7 +15,9 @@
         character.RemoveItem(item)
         If Not character.HasTag(TagType.EatMessage) Then
             character.SetTag(TagType.EatMessage)
-            character.AddMessage({
+            character.AddMessage(
+                Nothing,
+                {
                     (Mood.Info, "Hungry?"),
                     (Mood.Info, "Blueberries"),
                     (Mood.Info, "satisfy!")
@@ -26,7 +28,9 @@
     Public Overrides Sub OnTake(item As Item, character As ICharacter)
         If Not character.HasTag(TagType.FoodMessage) Then
             character.SetTag(TagType.FoodMessage)
-            character.AddMessage({
+            character.AddMessage(
+                Nothing,
+                {
                     (Mood.Info, "Blueberry"),
                     (Mood.Info, "(fer when"),
                     (Mood.Info, "yer"),

@@ -48,9 +48,9 @@ Public Class Character
         End If
     End Sub
 
-    Public Sub AddMessage(lines As IEnumerable(Of (Mood As String, Text As String))) Implements ICharacter.AddMessage
+    Public Sub AddMessage(sfx As String, lines As IEnumerable(Of (Mood As String, Text As String))) Implements ICharacter.AddMessage
         If IsAvatar Then
-            World.AddMessage(lines)
+            World.AddMessage(sfx, lines)
         End If
     End Sub
 

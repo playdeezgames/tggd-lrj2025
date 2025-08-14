@@ -20,4 +20,10 @@ Friend Class Message
             Return data.Messages.FirstOrDefault.Lines.Select(Function(x) (x.Mood, x.Text))
         End Get
     End Property
+
+    Public ReadOnly Property Sfx As String Implements IMessage.Sfx
+        Get
+            Return data.Messages.FirstOrDefault.Sfx
+        End Get
+    End Property
 End Class

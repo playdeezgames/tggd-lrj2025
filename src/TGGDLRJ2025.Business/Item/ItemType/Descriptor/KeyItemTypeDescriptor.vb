@@ -16,7 +16,8 @@
     Public Overrides Sub OnTake(item As Item, character As ICharacter)
         If Not character.HasTag(TagType.KeyMessage) Then
             character.SetTag(TagType.KeyMessage)
-            character.AddMessage({
+            character.AddMessage(Nothing,
+                {
                     (Mood.Info, "Save keys"),
                     (Mood.Info, "to open"),
                     (Mood.Info, "doors")

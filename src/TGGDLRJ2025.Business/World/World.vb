@@ -112,9 +112,10 @@ Public Class World
         Clear()
     End Sub
 
-    Public Sub AddMessage(lines As IEnumerable(Of (Mood As String, Text As String))) Implements IWorld.AddMessage
+    Public Sub AddMessage(sfx As String, lines As IEnumerable(Of (Mood As String, Text As String))) Implements IWorld.AddMessage
         data.Messages.Add(New MessageData With
                           {
+                            .Sfx = sfx,
                             .Lines = lines.Select(Function(x) New MessageLineData With
                                                       {
                                                         .Mood = x.Mood,
