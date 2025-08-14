@@ -2,7 +2,7 @@
     Inherits ItemTypeDescriptor
 
     Public Sub New(itemType As String)
-        MyBase.New(itemType, 1, 0, 0, 0, Sfx.Yoink)
+        MyBase.New(itemType, "Key", 1, 0, 0, 0, Sfx.Yoink)
     End Sub
 
     Public Overrides Sub Initialize(item As IItem)

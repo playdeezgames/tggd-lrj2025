@@ -29,6 +29,7 @@
     Friend MustOverride Function CanSpawn(location As ILocation) As Boolean
     Friend MustOverride Sub OnMove(character As ICharacter)
     Friend MustOverride Sub OnHitEnemy(character As ICharacter, enemy As ICharacter)
+    Friend MustOverride Sub OnAttemptUseItemOfType(character As ICharacter, itemType As String)
     Friend Sub OnInteract(agent As ICharacter, target As ICharacter, isCounter As Boolean)
         If Not target.IsDead Then
             Dim attack = agent.GetStatistic(StatisticType.Attack).Value

@@ -4,6 +4,7 @@
     Public Sub New()
         MyBase.New(
             Business.ItemType.Sword,
+            "Sword",
             25,
             20,
             0,

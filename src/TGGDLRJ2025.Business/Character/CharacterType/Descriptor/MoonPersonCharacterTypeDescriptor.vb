@@ -27,6 +27,9 @@
     Friend Overrides Sub OnHitEnemy(character As ICharacter, enemy As ICharacter)
     End Sub
 
+    Friend Overrides Sub OnAttemptUseItemOfType(character As ICharacter, itemType As String)
+    End Sub
+
     Friend Overrides Function CanSpawn(location As ILocation) As Boolean
         If location.HasCharacter Then
             Return False

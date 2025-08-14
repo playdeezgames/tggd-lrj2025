@@ -63,6 +63,10 @@ Public Class Character
         CharacterType.ToCharacterTypeDescriptor.OnInteract(Me, otherCharacter, isCounter)
     End Sub
 
+    Public Sub AttemptUseItemOfType(itemType As String) Implements ICharacter.AttemptUseItemOfType
+        CharacterType.ToCharacterTypeDescriptor.OnAttemptUseItemOfType(Me, itemType)
+    End Sub
+
     Public ReadOnly Property CharacterType As String Implements ICharacter.CharacterType
         Get
             Return CharacterData.CharacterType

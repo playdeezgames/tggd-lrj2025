@@ -6,6 +6,7 @@
     ReadOnly Property Map As IMap
     ReadOnly Property World As IWorld
     Sub AttemptMove(directionType As String)
+    Sub AttemptUseItemOfType(itemType As String)
     Sub AddMessage(sfx As String, lines As IEnumerable(Of (Mood As String, Text As String)))
     ReadOnly Property IsAvatar As Boolean
     ReadOnly Property IsDead As Boolean

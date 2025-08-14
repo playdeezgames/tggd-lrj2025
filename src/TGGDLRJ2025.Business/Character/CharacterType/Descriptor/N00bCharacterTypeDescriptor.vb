@@ -75,6 +75,20 @@
         End If
     End Sub
 
+    Friend Overrides Sub OnAttemptUseItemOfType(character As ICharacter, itemType As String)
+        Dim itemTypeDescriptor = itemType.ToItemTypeDescriptor
+        If Not character.HasItemType(itemType) Then
+            character.AddMessage(
+                Nothing,
+                {
+                    (Mood.Info, "You have"),
+                    (Mood.Info, $"no {itemTypeDescriptor.Name}")
+                })
+            Return
+        End If
+        itemTypeDescriptor.OnUse(character.GetItemOfType(itemType), character)
+    End Sub
+
     Friend Overrides Function CanSpawn(location As ILocation) As Boolean
         Return location.LocationType = Business.LocationType.StartingRoomFloor
     End Function
