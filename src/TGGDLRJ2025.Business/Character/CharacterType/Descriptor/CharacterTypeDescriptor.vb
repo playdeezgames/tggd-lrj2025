@@ -56,6 +56,7 @@
                     lines.Add((Mood.Info, "next one!"))
                     lines.Add((Mood.Info, $"({swordsLeft - 1} left)"))
                     Dim item = character.GetItemOfType(ItemType.Sword)
+                    character.SetStatistic(StatisticType.SwordDurability, item.GetStatistic(StatisticType.SwordDurability).Value)
                     character.RemoveItem(item)
                 Else
                     lines.Add((Mood.Info, "Yer last"))
@@ -127,6 +128,7 @@
                     lines.Add((Mood.Info, "next one!"))
                     lines.Add((Mood.Info, $"({shieldsLeft - 1} left)"))
                     Dim item = character.GetItemOfType(ItemType.Shield)
+                    character.SetStatistic(StatisticType.ShieldDurability, item.GetStatistic(StatisticType.ShieldDurability).Value)
                     character.RemoveItem(item)
                 Else
                     lines.Add((Mood.Info, "Yer last"))

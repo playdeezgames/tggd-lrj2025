@@ -37,16 +37,56 @@ Friend Class NavigationState
 
     Private Sub DrawStatistics()
         Dim font = Fonts.GetFont(UI.Font.CyFont3x5)
-        Dim x As Integer = 0
         Dim y As Integer = 0
         Dim avatar = world.Avatar
-        Dim text = $"H{avatar.GetStatistic(Business.StatisticType.Health):d3} "
-        x = font.Write(buffer, x, y, Hue.Red, text)
-        text = $"S{avatar.GetStatistic(Business.StatisticType.Satiety):d3} "
-        x = font.Write(buffer, x, y, Hue.Magenta, text)
-        text = $"F{avatar.GetItemTypeCount(ItemType.Food)}"
-        font.Write(buffer, x, y, Hue.DarkBlue, text)
+        Dim x = DrawHealth(font, 0, y, avatar)
+        x = DrawSatiety(font, x, y, avatar)
+        DrawFood(font, x, y, avatar)
+        Dim spriteFont = Fonts.GetFont(UI.Font.BlueRoom)
+        y = buffer.Rows - spriteFont.Height
+        x = DrawPotions(spriteFont, font, 0, y, avatar)
+        x = DrawSwords(spriteFont, font, x, y, avatar)
+        DrawShields(spriteFont, font, x, y, avatar)
     End Sub
+
+    Private Function DrawPotions(spriteFont As IUIFont(Of Integer), font As IUIFont(Of Integer), x As Integer, y As Integer, avatar As ICharacter) As Integer
+        Dim displayProperties = ItemTypeDisplayProperties.ToItemTypeDisplayProperties(ItemType.Potion)
+        Dim count = avatar.GetItemTypeCount(ItemType.Potion)
+        Dim result = spriteFont.Write(buffer, x, y, displayProperties.Hue, displayProperties.Glyph)
+        font.Write(buffer, x, y, Hue.White, $"{count}")
+        Return result
+    End Function
+
+    Private Function DrawSwords(spriteFont As IUIFont(Of Integer), font As IUIFont(Of Integer), x As Integer, y As Integer, avatar As ICharacter) As Integer
+        Dim displayProperties = ItemTypeDisplayProperties.ToItemTypeDisplayProperties(ItemType.Sword)
+        Dim count = avatar.GetItemTypeCount(ItemType.Sword) + If(avatar.GetStatistic(StatisticType.SwordDurability).Value > 0, 1, 0)
+        Dim result = spriteFont.Write(buffer, x, y, displayProperties.Hue, displayProperties.Glyph)
+        font.Write(buffer, x, y, Hue.White, $"{count}")
+        Return result
+    End Function
+
+    Private Function DrawShields(spriteFont As IUIFont(Of Integer), font As IUIFont(Of Integer), x As Integer, y As Integer, avatar As ICharacter) As Integer
+        Dim displayProperties = ItemTypeDisplayProperties.ToItemTypeDisplayProperties(ItemType.Shield)
+        Dim count = avatar.GetItemTypeCount(ItemType.Shield) + If(avatar.GetStatistic(StatisticType.ShieldDurability).Value > 0, 1, 0)
+        Dim result = spriteFont.Write(buffer, x, y, displayProperties.Hue, displayProperties.Glyph)
+        font.Write(buffer, x, y, Hue.White, $"{count}")
+        Return result
+    End Function
+
+    Private Function DrawFood(font As IUIFont(Of Integer), x As Integer, y As Integer, avatar As ICharacter) As Integer
+        Dim text As String = $"F{avatar.GetItemTypeCount(ItemType.Food)}"
+        Return font.Write(buffer, x, y, Hue.DarkBlue, text)
+    End Function
+
+    Private Function DrawSatiety(font As IUIFont(Of Integer), x As Integer, y As Integer, avatar As ICharacter) As Integer
+        Dim Text = $"S{avatar.GetStatistic(Business.StatisticType.Satiety):d3} "
+        Return font.Write(buffer, x, y, Hue.Magenta, Text)
+    End Function
+
+    Private Function DrawHealth(font As IUIFont(Of Integer), x As Integer, y As Integer, avatar As ICharacter) As Integer
+        Dim Text = $"H{avatar.GetStatistic(Business.StatisticType.Health):d3} "
+        Return font.Write(buffer, x, y, Hue.Red, Text)
+    End Function
 
     Private Sub DrawMap()
         Dim font = Fonts.GetFont(UI.Font.BlueRoom)
