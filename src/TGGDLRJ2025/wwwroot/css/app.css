@@ -121,7 +121,7 @@ code {
 
 .pixel-grid-table {
     border-collapse: collapse;
-    margin: 20px;
+    margin: 0px;
     outline: none;
 }
 

@@ -44,7 +44,7 @@
         If locationDescriptor.IsSolid Then
             Return False
         End If
-        If location.HasCharacter Then
+        If location.HasCharacter AndAlso location.Character.IsAvatar Then
             Return False
         End If
         Return True

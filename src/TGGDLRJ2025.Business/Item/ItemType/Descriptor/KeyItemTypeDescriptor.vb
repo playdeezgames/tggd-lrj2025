@@ -31,9 +31,9 @@
         If locationDescriptor.IsSolid Then
             Return False
         End If
-        If Location.HasCharacter Then
+        If Location.LocationType <> LocationType.RoomFloor Then
             Return False
         End If
-        Return Location.LocationType = LocationType.RoomFloor
+        Return Location.HasCharacter AndAlso Not Location.Character.IsAvatar
     End Function
 End Class

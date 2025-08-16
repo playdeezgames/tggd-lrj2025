@@ -65,6 +65,7 @@ Public Class Character
 
     Public Sub AttemptUseItemOfType(itemType As String) Implements ICharacter.AttemptUseItemOfType
         CharacterType.ToCharacterTypeDescriptor.OnAttemptUseItemOfType(Me, itemType)
+        HandleThreats(Location)
     End Sub
 
     Public ReadOnly Property CharacterType As String Implements ICharacter.CharacterType

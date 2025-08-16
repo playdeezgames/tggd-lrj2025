@@ -167,10 +167,17 @@ Friend Class NavigationState
             Case UI.Command.Red
                 Return New GameMenuState(buffer, world, playSfx)
             Case UI.Command.Green
-                world.Avatar.AttemptUseItemOfType(ItemType.Potion)
-                Return Neutral.DetermineState(buffer, world, playSfx)
+                Return UsePotion()
             Case Else
                 Return Me
         End Select
+    End Function
+
+    Private Function UsePotion() As IUIState
+        If Not world.Avatar.HasItemType(ItemType.Potion) Then
+            world.Avatar.AttemptUseItemOfType(ItemType.Potion)
+            Return Neutral.DetermineState(buffer, world, playSfx)
+        End If
+        Return New ConfirmUsePotionState(buffer, world, playSfx)
     End Function
 End Class
