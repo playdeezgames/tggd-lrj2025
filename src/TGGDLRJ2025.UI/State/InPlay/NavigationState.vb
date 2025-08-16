@@ -37,17 +37,27 @@ Friend Class NavigationState
 
     Private Sub DrawStatistics()
         Dim font = Fonts.GetFont(UI.Font.CyFont3x5)
+        buffer.Fill(0, 0, buffer.Columns, font.Height, Hue.DarkerGray)
         Dim y As Integer = 0
         Dim avatar = world.Avatar
         Dim x = DrawHealth(font, 0, y, avatar)
         x = DrawSatiety(font, x, y, avatar)
-        DrawFood(font, x, y, avatar)
         Dim spriteFont = Fonts.GetFont(UI.Font.BlueRoom)
         y = buffer.Rows - spriteFont.Height
-        x = DrawPotions(spriteFont, font, 0, y, avatar)
+        buffer.Fill(0, y, buffer.Columns, spriteFont.Height, Hue.DarkerGray)
+        x = DrawFood(spriteFont, font, 0, y, avatar)
+        x = DrawPotions(spriteFont, font, x, y, avatar)
         x = DrawSwords(spriteFont, font, x, y, avatar)
         DrawShields(spriteFont, font, x, y, avatar)
     End Sub
+
+    Private Function DrawFood(spriteFont As IUIFont(Of Integer), font As IUIFont(Of Integer), x As Integer, y As Integer, avatar As ICharacter) As Integer
+        Dim displayProperties = ItemTypeDisplayProperties.ToItemTypeDisplayProperties(ItemType.Food)
+        Dim count = avatar.GetItemTypeCount(ItemType.Food)
+        Dim result = spriteFont.Write(buffer, x, y, displayProperties.Hue, displayProperties.Glyph)
+        font.Write(buffer, x, y, Hue.White, $"{count}")
+        Return result
+    End Function
 
     Private Function DrawPotions(spriteFont As IUIFont(Of Integer), font As IUIFont(Of Integer), x As Integer, y As Integer, avatar As ICharacter) As Integer
         Dim displayProperties = ItemTypeDisplayProperties.ToItemTypeDisplayProperties(ItemType.Potion)
@@ -71,11 +81,6 @@ Friend Class NavigationState
         Dim result = spriteFont.Write(buffer, x, y, displayProperties.Hue, displayProperties.Glyph)
         font.Write(buffer, x, y, Hue.White, $"{count}")
         Return result
-    End Function
-
-    Private Function DrawFood(font As IUIFont(Of Integer), x As Integer, y As Integer, avatar As ICharacter) As Integer
-        Dim text As String = $"F{avatar.GetItemTypeCount(ItemType.Food)}"
-        Return font.Write(buffer, x, y, Hue.DarkBlue, text)
     End Function
 
     Private Function DrawSatiety(font As IUIFont(Of Integer), x As Integer, y As Integer, avatar As ICharacter) As Integer
