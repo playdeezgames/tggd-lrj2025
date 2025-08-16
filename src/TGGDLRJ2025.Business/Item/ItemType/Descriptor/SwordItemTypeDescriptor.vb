@@ -5,7 +5,7 @@
         MyBase.New(
             Business.ItemType.Sword,
             "Sword",
-            25,
+            10,
             Sfx.Yoink)
         Statistics.Add(StatisticType.Attack, 20)
         Statistics.Add(StatisticType.SwordDurability, 5)

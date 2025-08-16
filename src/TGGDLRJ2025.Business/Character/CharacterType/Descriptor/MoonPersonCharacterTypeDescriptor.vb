@@ -14,12 +14,11 @@
         Statistics.Add(Health, 25)
         Statistics.Add(StatisticType.Attack, 20)
         Statistics.Add(StatisticType.Defend, 0)
+        Statistics.Add(StatisticType.ShieldDurability, 0)
+        Statistics.Add(StatisticType.SwordDurability, 0)
     End Sub
 
     Friend Overrides Sub OnMove(character As ICharacter)
-    End Sub
-
-    Friend Overrides Sub OnHitEnemy(character As ICharacter, enemy As ICharacter)
     End Sub
 
     Friend Overrides Sub OnAttemptUseItemOfType(character As ICharacter, itemType As String)

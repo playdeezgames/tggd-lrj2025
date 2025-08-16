@@ -49,31 +49,6 @@
         Next
     End Sub
 
-    Friend Overrides Sub OnHitEnemy(character As ICharacter, enemy As ICharacter)
-        If character.GetStatistic(StatisticType.SwordDurability).Value > character.GetStatisticMinimum(StatisticType.SwordDurability) Then
-            character.ChangeStatistic(StatisticType.SwordDurability, -1)
-            If character.GetStatistic(StatisticType.SwordDurability).Value <= character.GetStatisticMinimum(StatisticType.SwordDurability) Then
-                Dim lines As New List(Of (Mood As String, Text As String))
-                Dim swordsLeft = character.GetItemTypeCount(ItemType.Sword)
-                If swordsLeft > 0 Then
-                    lines.Add((Mood.Info, "Yer sword"))
-                    lines.Add((Mood.Info, "broke!"))
-                    lines.Add((Mood.Info, "Equipping"))
-                    lines.Add((Mood.Info, "next one!"))
-                    lines.Add((Mood.Info, $"({swordsLeft - 1} left)"))
-                    Dim item = character.GetItemOfType(ItemType.Sword)
-                    character.RemoveItem(item)
-                Else
-                    lines.Add((Mood.Info, "Yer last"))
-                    lines.Add((Mood.Info, "sword"))
-                    lines.Add((Mood.Info, "broke!"))
-                    character.SetStatistic(StatisticType.Attack, character.CharacterType.ToCharacterTypeDescriptor.GetStatistic(StatisticType.Attack).Value)
-                End If
-                character.AddMessage(Nothing, lines)
-            End If
-        End If
-    End Sub
-
     Friend Overrides Sub OnAttemptUseItemOfType(character As ICharacter, itemType As String)
         Dim itemTypeDescriptor = itemType.ToItemTypeDescriptor
         If Not character.HasItemType(itemType) Then
