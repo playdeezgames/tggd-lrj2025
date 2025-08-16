@@ -2,10 +2,9 @@
     Inherits ItemTypeDescriptor
 
     Public Sub New()
-        MyBase.New(Business.ItemType.Shield, "Shield", 0, 0, 10, 5, Sfx.Yoink)
-    End Sub
-
-    Public Overrides Sub Initialize(item As IItem)
+        MyBase.New(Business.ItemType.Shield, "Shield", 0, Sfx.Yoink)
+        Statistics.Add(StatisticType.Defend, 10)
+        Statistics.Add(StatisticType.ShieldDurability, 5)
     End Sub
 
     Public Overrides Sub OnUse(item As IItem, character As ICharacter)

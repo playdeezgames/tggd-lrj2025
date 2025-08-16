@@ -6,13 +6,9 @@
             Business.ItemType.Sword,
             "Sword",
             25,
-            20,
-            0,
-            5,
             Sfx.Yoink)
-    End Sub
-
-    Public Overrides Sub Initialize(item As IItem)
+        Statistics.Add(StatisticType.Attack, 20)
+        Statistics.Add(StatisticType.SwordDurability, 5)
     End Sub
 
     Public Overrides Sub OnUse(item As IItem, character As ICharacter)
@@ -20,9 +16,9 @@
 
     Public Overrides Sub OnTake(item As Item, character As ICharacter)
         If character.GetStatistic(StatisticType.SwordDurability) <= character.GetStatisticMinimum(StatisticType.SwordDurability) Then
-            character.SetStatistic(StatisticType.SwordDurability, item.ItemType.ToItemTypeDescriptor.Durability)
+            character.SetStatistic(StatisticType.SwordDurability, item.GetStatistic(StatisticType.SwordDurability))
             character.RemoveItem(item)
-            character.SetStatistic(StatisticType.Attack, item.ItemType.ToItemTypeDescriptor.Attack)
+            character.SetStatistic(StatisticType.Attack, item.GetStatistic(StatisticType.Attack))
             character.AddMessage(
                 Nothing,
                 {

@@ -6,26 +6,25 @@
             Business.CharacterType.N00b,
             0,
             "N00b",
-            10,
-            5,
             Sfx.PlayerHit,
             Sfx.PlayerMiss,
             Sfx.PlayerDeath)
+        StatisticMinimums.Add(Health, 0)
+        StatisticMaximums.Add(Health, 100)
+        Statistics.Add(Health, 100)
+        StatisticMinimums.Add(Satiety, 0)
+        StatisticMaximums.Add(Satiety, 100)
+        Statistics.Add(Satiety, 100)
+        Statistics.Add(StatisticType.Attack, 10)
+        Statistics.Add(StatisticType.Defend, 5)
+        Statistics.Add(SwordDurability, 0)
+        StatisticMinimums.Add(SwordDurability, 0)
+        Statistics.Add(ShieldDurability, 0)
+        StatisticMinimums.Add(ShieldDurability, 0)
     End Sub
 
     Friend Overrides Sub Initialize(character As ICharacter)
-        character.SetStatistic(StatisticType.Health, 100)
-        character.SetStatisticMinimum(StatisticType.Health, 0)
-        character.SetStatisticMaximum(StatisticType.Health, 100)
-        character.SetStatistic(StatisticType.Satiety, 100)
-        character.SetStatisticMinimum(StatisticType.Satiety, 0)
-        character.SetStatisticMaximum(StatisticType.Satiety, 100)
-        character.SetStatistic(StatisticType.Attack, character.CharacterType.ToCharacterTypeDescriptor.Attack)
-        character.SetStatistic(StatisticType.Defend, character.CharacterType.ToCharacterTypeDescriptor.Defend)
-        character.SetStatisticMinimum(StatisticType.SwordDurability, 0)
-        character.SetStatistic(StatisticType.SwordDurability, 0)
-        character.SetStatisticMinimum(StatisticType.ShieldDurability, 0)
-        character.SetStatistic(StatisticType.ShieldDurability, 0)
+        MyBase.Initialize(character)
     End Sub
 
     Friend Overrides Sub OnMove(character As ICharacter)
@@ -68,7 +67,7 @@
                     lines.Add((Mood.Info, "Yer last"))
                     lines.Add((Mood.Info, "sword"))
                     lines.Add((Mood.Info, "broke!"))
-                    character.SetStatistic(StatisticType.Attack, character.CharacterType.ToCharacterTypeDescriptor.Attack)
+                    character.SetStatistic(StatisticType.Attack, character.CharacterType.ToCharacterTypeDescriptor.GetStatistic(StatisticType.Attack).Value)
                 End If
                 character.AddMessage(Nothing, lines)
             End If

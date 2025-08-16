@@ -4,7 +4,7 @@
     Const FOOD_SATIETY_BENEFIT = 25
 
     Public Sub New()
-        MyBase.New(Business.ItemType.Food, "Blueberry", 50, 0, 0, 0, Sfx.Take)
+        MyBase.New(Business.ItemType.Food, "Blueberry", 50, Sfx.Take)
     End Sub
 
     Public Overrides Sub Initialize(item As IItem)

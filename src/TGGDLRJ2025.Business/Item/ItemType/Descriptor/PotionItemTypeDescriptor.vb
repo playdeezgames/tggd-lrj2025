@@ -2,11 +2,8 @@
     Inherits ItemTypeDescriptor
 
     Public Sub New()
-        MyBase.New(Business.ItemType.Potion, "Potion", 25, 0, 0, 0, Sfx.Yoink)
-    End Sub
-
-    Public Overrides Sub Initialize(item As IItem)
-        item.SetStatistic(StatisticType.Health, 50)
+        MyBase.New(Business.ItemType.Potion, "Potion", 25, Sfx.Yoink)
+        Statistics.Add(Health, 50)
     End Sub
 
     Public Overrides Sub OnUse(item As IItem, character As ICharacter)

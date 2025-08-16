@@ -6,19 +6,14 @@
             Business.CharacterType.MoonPerson,
             40,
             "Moonie",
-            20,
-            0,
             Sfx.EnemyHit,
             Sfx.EnemyMiss,
             Sfx.EnemyDeath)
-    End Sub
-
-    Friend Overrides Sub Initialize(character As ICharacter)
-        character.SetStatistic(StatisticType.Health, 25)
-        character.SetStatisticMinimum(StatisticType.Health, 0)
-        character.SetStatisticMaximum(StatisticType.Health, 25)
-        character.SetStatistic(StatisticType.Attack, character.CharacterType.ToCharacterTypeDescriptor.Attack)
-        character.SetStatistic(StatisticType.Defend, character.CharacterType.ToCharacterTypeDescriptor.Defend)
+        StatisticMinimums.Add(Health, 0)
+        StatisticMaximums.Add(Health, 25)
+        Statistics.Add(Health, 25)
+        Statistics.Add(StatisticType.Attack, 20)
+        Statistics.Add(StatisticType.Defend, 0)
     End Sub
 
     Friend Overrides Sub OnMove(character As ICharacter)

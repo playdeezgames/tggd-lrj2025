@@ -5,14 +5,13 @@
     Friend ReadOnly Property HitSfx As String
     Friend ReadOnly Property MissSfx As String
     Friend ReadOnly Property DeathSfx As String
-    Friend ReadOnly Property Attack As Integer
-    Friend ReadOnly Property Defend As Integer
+    Protected Statistics As New Dictionary(Of String, Integer)
+    Protected StatisticMaximums As New Dictionary(Of String, Integer)
+    Protected StatisticMinimums As New Dictionary(Of String, Integer)
     Sub New(
            characterType As String,
            characterCount As Integer,
            name As String,
-           attack As Integer,
-           defend As Integer,
            hitSfx As String,
            missSfx As String,
            deathSfx As String)
@@ -22,10 +21,26 @@
         Me.HitSfx = hitSfx
         Me.MissSfx = missSfx
         Me.DeathSfx = deathSfx
-        Me.Attack = attack
-        Me.Defend = defend
     End Sub
-    Friend MustOverride Sub Initialize(character As ICharacter)
+
+    Friend Overridable Sub Initialize(character As ICharacter)
+        For Each entry In StatisticMaximums
+            character.SetStatisticMaximum(entry.Key, entry.Value)
+        Next
+        For Each entry In StatisticMinimums
+            character.SetStatisticMinimum(entry.Key, entry.Value)
+        Next
+        For Each entry In Statistics
+            character.SetStatistic(entry.Key, entry.Value)
+        Next
+    End Sub
+    Friend Function GetStatistic(statisticType As String) As Integer?
+        Dim result As Integer
+        If Statistics.TryGetValue(statisticType, result) Then
+            Return result
+        End If
+        Return Nothing
+    End Function
     Friend MustOverride Function CanSpawn(location As ILocation) As Boolean
     Friend MustOverride Sub OnMove(character As ICharacter)
     Friend MustOverride Sub OnHitEnemy(character As ICharacter, enemy As ICharacter)
