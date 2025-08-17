@@ -31,7 +31,7 @@ Friend Class TutorialState
                 UI.Command.Green
             ),
             (
-                {"<Escape>", "cancel!"},
+                {"<Back", "Space>", "cancel!"},
                 UI.Command.Red
             )
         }
