@@ -417,3 +417,5 @@ FodyWeavers.xsd
 *.msm
 *.msp
 /pub-html
+# Odin port
+/build/

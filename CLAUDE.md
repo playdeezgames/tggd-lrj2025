@@ -17,7 +17,21 @@ Conventions from those ports that apply here: keep the rules in a package with n
 
 Toolchain on this machine: `odin` at `/home/yermom/ODIN/odin` (nightly), `dotnet` at `/usr/bin/dotnet`, `butler` for itch.io.
 
-## Commands (original VB.NET build)
+## Commands (Odin port, in `odin/` and `tools/`)
+
+Decisions made with the user: **exact port** (quirks listed and decided one at a time afterwards), **browser only**, **saving to localStorage** (autosave after every turn; a Continue item on the main menu only when a valid save exists; abandon and death clear the save; namespace the key, itch.io HTML5 games share one origin), **shared 64x64 framebuffer** of palette indices that the page expands to a scaled canvas.
+
+```bash
+tools/test.sh      # native odin tests (ODIN_TEST_THREADS=1) + web build with -vet-shadowing -vet-unused
+tools/build.sh     # web build into build/web (ODIN_FLAGS="-o:size" for the shipping build)
+PORT=8091 tools/serve.sh   # serve build/web; avoid 8765, often taken
+```
+
+Layout: `odin/game` (package `game`, no platform imports, `core_init`/`core_step`, imported as `tggd:game` via `-collection:tggd=odin`), `odin/platform/web` (`#+build js`: exports + `page/` JS), `odin/tests` (`#+build !js`). Input is the original's 8 `Command`s; the page's key table is a copy of `Home.razor`'s `CommandTable` (case-sensitive and held keys repeat, as in the original; both are quirks to decide later).
+
+Milestone status: 1 (skeleton, smoke screen, build, tests) done. Next: fonts/palette assets, static room render, world generation, rules, UI states, saving, touch, ship.
+
+## Commands (original VB.NET build, `src/`)
 
 There are no tests and no linter. The solution is `src/src.sln` (net9.0).
 
