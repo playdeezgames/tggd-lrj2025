@@ -76,17 +76,26 @@ present :: proc(core: ^Core) {
 }
 
 draw_smoke :: proc(core: ^Core) {
-	fill_rect(core, 0, 0, FRAME_WIDTH, FRAME_HEIGHT, .Black)
-	// 24 swatches, 6 across and 4 down, 10 by 8 pixels each
+	fill_all(core, .Black)
+	text, small, sprites := &FONTS[.Text], &FONTS[.Small], &FONTS[.Sprites]
+	write_centered(core, text, FRAME_WIDTH / 2, 0, .Light_Blue, "Blue Room")
+	// the twelve sprites, six to a row, each in its own hue
+	for n in 1 ..= 12 {
+		write_glyph(core, sprites, ((n - 1) % 6) * 10 + 2, 12 + ((n - 1) / 6) * 11, Hue(n + 2), u8(n))
+	}
+	write_text(core, small, 0, 36, .Red, "H100 ")
+	write_text(core, small, 20, 36, .Magenta, "S100")
+	write_centered(core, small, FRAME_WIDTH / 2, 45, .Dark_Gray, "m3x6 + m5x7")
+	// 24 swatches, 2 pixels wide
 	for hue in 0 ..< len(Hue) {
-		fill_rect(core, (hue % 6) * 10 + 2, (hue / 6) * 8 + 2, 10, 8, Hue(hue))
+		fill_rect(core, 8 + hue * 2, 54, 2, 3, Hue(hue))
 	}
 	// the last colour command, as a bar in its own colour
 	#partial switch core.last_command {
-	case .Green:  fill_rect(core, 2, 38, 60, 4, .Green)
-	case .Red:    fill_rect(core, 2, 38, 60, 4, .Red)
-	case .Blue:   fill_rect(core, 2, 38, 60, 4, .Blue)
-	case .Yellow: fill_rect(core, 2, 38, 60, 4, .Yellow)
+	case .Green:  fill_rect(core, 2, 59, 60, 3, .Green)
+	case .Red:    fill_rect(core, 2, 59, 60, 3, .Red)
+	case .Blue:   fill_rect(core, 2, 59, 60, 3, .Blue)
+	case .Yellow: fill_rect(core, 2, 59, 60, 3, .Yellow)
 	}
 	set_pixel(core, core.cursor_x, core.cursor_y, .White)
 }

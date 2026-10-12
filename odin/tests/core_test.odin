@@ -62,8 +62,8 @@ a_changed_frame_is_rgba_of_the_drawn_hues :: proc(t: ^testing.T) {
 	play(&r, .Green)
 	testing.expect(t, r.out.frame_changed)
 	palette := game.PALETTE
-	// the green bar sits at (2..62, 38..41); the cursor is elsewhere
-	testing.expect_value(t, r.out.frame[10 + 39 * game.FRAME_WIDTH], palette[game.Hue.Green])
+	// the green bar sits at (2..62, 59..61); the cursor is elsewhere
+	testing.expect_value(t, r.out.frame[10 + 60 * game.FRAME_WIDTH], palette[game.Hue.Green])
 	// the cursor is white
 	c := r.core
 	testing.expect_value(t, r.out.frame[c.cursor_x + c.cursor_y * game.FRAME_WIDTH], palette[game.Hue.White])
@@ -82,11 +82,12 @@ rng_is_deterministic_and_in_range :: proc(t: ^testing.T) {
 }
 
 // ---- drawing engine, with a tiny font made here (the real font data is not chosen yet) ---------------
-// A 3-wide, 2-high font holding 'A' (index 0) and 'B': A = top row full, bottom row left pixel; B = both rows right pixel.
+// A 2-high font with advance 3 holding 'A' (index 0) and 'B': A = top row full, bottom row left pixel; B = both rows right pixel.
 test_font_rows := [4]u16{0b111, 0b001, 0b100, 0b100}
+test_font_advance := [2]u8{3, 3}
 
 test_font :: proc() -> game.Font {
-	return {width = 3, height = 2, first = 'A', count = 2, rows = test_font_rows[:]}
+	return {height = 2, first = 'A', count = 2, space = 3, advance = test_font_advance[:], rows = test_font_rows[:]}
 }
 
 @(test)
@@ -166,4 +167,40 @@ every_sound_has_a_wav_path :: proc(t: ^testing.T) {
 		testing.expectf(t, len(path) > 4 && path[len(path) - 4:] == ".wav", "%v has no .wav path", sfx)
 	}
 	testing.expect_value(t, len(files), 12)
+}
+
+// ---- the real font data -----------------------------------------------------------------------------
+@(test)
+generated_fonts_have_the_expected_shapes :: proc(t: ^testing.T) {
+	fonts := game.FONTS
+	small, text, sprites := &fonts[.Small], &fonts[.Text], &fonts[.Sprites]
+	testing.expect_value(t, small.height, 8)  // m3x6: 6 above the baseline, 2 below
+	testing.expect_value(t, text.height, 9)   // m5x7: 7 above, 2 below
+	testing.expect_value(t, sprites.height, 10)
+	testing.expect_value(t, len(small.rows), small.count * small.height)
+	testing.expect_value(t, len(text.rows), text.count * text.height)
+	testing.expect_value(t, len(sprites.rows), sprites.count * sprites.height)
+	testing.expect_value(t, len(small.advance), small.count)
+	// the designer's advances from the vault note: m3x6 'i' 2, 'H' 4, 'M' 6; m5x7 'i' 3, 'H' 6, 'M' 8
+	testing.expect_value(t, game.text_width(small, "iHM"), 2 + 4 + 6)
+	testing.expect_value(t, game.text_width(text, "iHM"), 3 + 6 + 8)
+	// HUD readouts like "H100 S100" fit the 64-pixel buffer with the small font
+	testing.expect(t, game.text_width(small, "H100 S100 ") <= game.FRAME_WIDTH)
+	// the title's widest line fits in the text font
+	testing.expect(t, game.text_width(text, "SPLORR!!") <= game.FRAME_WIDTH)
+}
+
+@(test)
+sprites_are_ten_wide_and_the_blank_is_empty :: proc(t: ^testing.T) {
+	fonts := game.FONTS
+	sprites := &fonts[.Sprites]
+	testing.expect_value(t, game.glyph_advance(sprites, u8(game.Sprite.Player)), 10)
+	for row in 0 ..< 10 { testing.expect_value(t, sprites.rows[int(game.Sprite.Blank) * 10 + row], 0) }
+	// every drawn sprite has ink, and none uses a column beyond the tenth
+	for sprite in game.Sprite.Player ..= game.Sprite.Threat {
+		ink: u16
+		for row in 0 ..< 10 { ink |= sprites.rows[int(sprite) * 10 + row] }
+		testing.expectf(t, ink != 0, "%v is blank", sprite)
+		testing.expectf(t, ink < 1 << 10, "%v spills past column 9", sprite)
+	}
 }

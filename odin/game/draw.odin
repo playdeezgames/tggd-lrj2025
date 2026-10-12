@@ -3,12 +3,14 @@ package game
 // Drawing into the hue buffer. Everything works on palette indices; present() converts them to RGBA.
 // Clipping is per pixel, like the original's UIBuffer.SetPixel.
 
-// A fixed-width bitmap font: `count` glyphs starting at character `first`, `height` rows each, one u16 per row
-// (bit x is the pixel in column x). A character outside the stored range draws nothing and still advances by `width`.
-// The font data itself lives apart from this engine (see Font_Id / FONTS once fonts are chosen).
+// A bitmap font: `count` glyphs starting at character `first`, `height` rows each, one u16 per row (bit x is the pixel
+// in column x). Each glyph has its own advance. A character outside the stored range draws nothing and advances by
+// `space`. The data is generated (font_data.odin); the sprite sheet is a Font too, with advance 10.
 Font :: struct {
-	width, height: int,
+	height:        int,
 	first, count:  int,
+	space:         int,
+	advance:       []u8,
 	rows:          []u16,
 }
 
@@ -35,10 +37,16 @@ write_glyph :: proc(core: ^Core, font: ^Font, x, y: int, hue: Hue, char: u8) {
 	if index < 0 || index >= font.count { return }
 	for row in 0 ..< font.height {
 		bits := font.rows[index * font.height + row]
-		for column in 0 ..< font.width {
+		for column in 0 ..< 16 {
 			if bits & (1 << uint(column)) != 0 { set_pixel(core, x + column, y + row, hue) }
 		}
 	}
+}
+
+glyph_advance :: proc(font: ^Font, char: u8) -> int {
+	index := int(char) - font.first
+	if index < 0 || index >= font.count { return font.space }
+	return int(font.advance[index])
 }
 
 // Draws text and returns the x just past it, like the original's UIFont.Write.
@@ -46,13 +54,15 @@ write_text :: proc(core: ^Core, font: ^Font, x, y: int, hue: Hue, text: string) 
 	x := x
 	for char in transmute([]u8)text {
 		write_glyph(core, font, x, y, hue, char)
-		x += font.width
+		x += glyph_advance(font, char)
 	}
 	return x
 }
 
 text_width :: proc(font: ^Font, text: string) -> int {
-	return len(text) * font.width
+	width := 0
+	for char in transmute([]u8)text { width += glyph_advance(font, char) }
+	return width
 }
 
 // The original centres on the integer half of the width (column - width \ 2).
