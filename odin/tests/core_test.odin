@@ -891,3 +891,210 @@ a_random_walk_never_breaks_the_world_invariants :: proc(t: ^testing.T) {
 		}
 	}
 }
+
+// ---- screens ---------------------------------------------------------------------------------------------
+// Presses commands one per step and returns the screen afterwards.
+press_all :: proc(r: ^Rig, commands: ..game.Command) -> game.Screen {
+	for c in commands { game.core_step(r.core, {events = {{command = c}}}, &r.out) }
+	return r.core.screen
+}
+
+queued_sfx :: proc(r: ^Rig) -> int { return r.out.sfx_count }
+
+@(test)
+the_game_boots_on_the_title_and_space_opens_the_menu :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	testing.expect_value(t, r.core.screen, game.Screen.Title)
+	testing.expect_value(t, press_all(&r, .Up, .Down, .Red, .Blue, .Yellow), game.Screen.Title)
+	testing.expect_value(t, press_all(&r, .Green), game.Screen.Main_Menu)
+	testing.expect_value(t, press_all(&r, .Red), game.Screen.Main_Menu) // nothing to cancel to
+}
+
+@(test)
+menus_wrap_around_at_both_ends :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	press_all(&r, .Green)
+	testing.expect_value(t, r.core.menu_index, 0)
+	press_all(&r, .Up)
+	testing.expect_value(t, r.core.menu_index, 1)
+	press_all(&r, .Down)
+	testing.expect_value(t, r.core.menu_index, 0)
+	press_all(&r, .Down, .Down)
+	testing.expect_value(t, r.core.menu_index, 0)
+}
+
+@(test)
+the_highlighted_menu_item_is_centred_with_a_bar :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	press_all(&r, .Green) // main menu, first item highlighted
+	// rows 28..36 (32 - 9/2 = 28, 9 high) are the bar, in the item hue; the second item below is unhighlighted
+	testing.expect_value(t, hue_at(r.core, 0, 28), game.Hue.Light_Gray)
+	testing.expect_value(t, hue_at(r.core, 63, 36), game.Hue.Light_Gray)
+	testing.expect_value(t, hue_at(r.core, 0, 27), game.Hue.Black)
+	testing.expect_value(t, hue_at(r.core, 0, 37), game.Hue.Black)
+	press_all(&r, .Down) // the bar stays put and the list scrolls under it
+	testing.expect_value(t, hue_at(r.core, 0, 28), game.Hue.Light_Gray)
+	testing.expect_value(t, hue_at(r.core, 0, 19), game.Hue.Black) // the first item is now above, unhighlighted
+}
+
+@(test)
+the_tutorial_waits_for_each_command_in_order :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	press_all(&r, .Green, .Green) // title, then Tutorial
+	testing.expect_value(t, r.core.screen, game.Screen.Tutorial)
+	testing.expect_value(t, press_all(&r, .Down, .Left, .Green), game.Screen.Tutorial) // wrong first command
+	testing.expect_value(t, r.core.tutorial_step, 0)
+	testing.expect_value(t, press_all(&r, .Up, .Up), game.Screen.Tutorial) // step 2 wants Down
+	testing.expect_value(t, r.core.tutorial_step, 1)
+	testing.expect_value(t, press_all(&r, .Down, .Left, .Right, .Green), game.Screen.Tutorial)
+	testing.expect_value(t, r.core.tutorial_step, 5)
+	testing.expect_value(t, press_all(&r, .Red), game.Screen.Main_Menu)
+}
+
+@(test)
+embark_builds_a_world_and_starts_play :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	testing.expect_value(t, press_all(&r, .Green, .Down, .Green), game.Screen.Navigation)
+	testing.expect_value(t, r.core.world.map_count, 16)
+	testing.expect(t, r.core.world.avatar != game.NONE)
+}
+
+play_world :: proc(r: ^Rig) {
+	press_all(r, .Green, .Down, .Green)
+}
+
+@(test)
+direction_commands_move_the_player_and_red_opens_the_game_menu :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	c.screen = .Navigation
+	c.dirty = true
+	before := c.world.characters[c.world.avatar].location
+	press_all(&r, .Right)
+	testing.expect(t, c.world.characters[c.world.avatar].location != before)
+	testing.expect_value(t, c.screen, game.Screen.Navigation)
+	testing.expect_value(t, press_all(&r, .Red), game.Screen.Game_Menu)
+	testing.expect_value(t, press_all(&r, .Red), game.Screen.Navigation)
+	testing.expect_value(t, press_all(&r, .Red, .Green), game.Screen.Navigation) // Continue
+}
+
+@(test)
+abandoning_needs_a_yes_and_returns_to_the_menu_with_nothing_left :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	play_world(&r)
+	press_all(&r, .Red, .Down, .Green) // game menu, Abandon
+	testing.expect_value(t, r.core.screen, game.Screen.Confirm_Abandon)
+	testing.expect_value(t, r.core.menu_index, 0) // No is first
+	testing.expect_value(t, press_all(&r, .Green), game.Screen.Game_Menu)
+	press_all(&r, .Down, .Green, .Red) // Abandon again, then cancel with Red
+	testing.expect_value(t, r.core.screen, game.Screen.Game_Menu)
+	press_all(&r, .Down, .Green, .Down, .Green) // Abandon, Yes
+	testing.expect_value(t, r.core.screen, game.Screen.Main_Menu)
+	testing.expect_value(t, r.core.world.map_count, 0)
+	testing.expect_value(t, r.core.world.avatar, game.NONE)
+	testing.expect_value(t, press_all(&r, .Down, .Green), game.Screen.Navigation) // and a new game starts fine
+}
+
+@(test)
+the_potion_key_asks_first_and_complains_when_there_is_none :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	c.screen = .Navigation
+	testing.expect_value(t, press_all(&r, .Green), game.Screen.Message) // no potion
+	testing.expect_value(t, message_text(c, 0), "You have|no Potion")
+	testing.expect_value(t, press_all(&r, .Green), game.Screen.Navigation)
+	carry(c, .Potion)
+	game.stat_set(&c.world.characters[c.world.avatar].stats, .Health, 40)
+	testing.expect_value(t, press_all(&r, .Green), game.Screen.Confirm_Potion)
+	testing.expect_value(t, press_all(&r, .Green), game.Screen.Navigation) // No (the first item)
+	testing.expect_value(t, stat(c, c.world.avatar, .Health), 40)
+	press_all(&r, .Green, .Down, .Green) // Yes
+	testing.expect_value(t, stat(c, c.world.avatar, .Health), 90)
+	testing.expect_value(t, r.core.screen, game.Screen.Message)
+	testing.expect_value(t, message_text(c, 0), "+50 health|you have|90/100")
+	testing.expect_value(t, press_all(&r, .Green), game.Screen.Navigation)
+}
+
+@(test)
+only_the_confirm_key_dismisses_a_message_and_its_sound_replays_on_other_keys :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	c.screen = .Navigation
+	moon(c, 6, 5)
+	testing.expect_value(t, press_all(&r, .Right), game.Screen.Message) // attack: two messages
+	testing.expect_value(t, c.world.message_count, 2)
+	testing.expect_value(t, r.out.sfx_count, 1) // the first message's sound, played on showing it
+	testing.expect_value(t, r.out.sfx[0], game.Sfx.Enemy_Hit)
+	testing.expect_value(t, press_all(&r, .Up), game.Screen.Message)
+	testing.expect_value(t, r.out.sfx_count, 1) // a quirk: it plays again
+	testing.expect_value(t, press_all(&r, .Red, .Left, .Blue), game.Screen.Message)
+	testing.expect_value(t, c.world.message_count, 2)
+	testing.expect_value(t, press_all(&r, .Green), game.Screen.Message) // the second message
+	testing.expect_value(t, r.out.sfx[0], game.Sfx.Player_Hit)
+	testing.expect_value(t, press_all(&r, .Green), game.Screen.Navigation)
+}
+
+@(test)
+dying_shows_the_messages_then_the_dead_screen_then_the_menu :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	c.screen = .Navigation
+	game.stat_set(&c.world.characters[c.world.avatar].stats, .Health, 10)
+	moon(c, 6, 5)
+	press_all(&r, .Right)
+	for c.screen == .Message { press_all(&r, .Green) }
+	testing.expect_value(t, c.screen, game.Screen.Dead)
+	testing.expect_value(t, press_all(&r, .Up, .Red, .Left), game.Screen.Dead)
+	testing.expect_value(t, press_all(&r, .Green), game.Screen.Main_Menu)
+	testing.expect_value(t, c.world.avatar, game.NONE)
+}
+
+@(test)
+every_screen_draws_something_and_text_that_fit_the_original_still_fits :: proc(t: ^testing.T) {
+	fonts := game.FONTS
+	text, small := &fonts[.Text], &fonts[.Small]
+	too_wide := 0
+	check :: proc(t: ^testing.T, font: ^game.Font, s: string, limit: int) {
+		w := game.text_width(font, s)
+		testing.expectf(t, w <= limit, "%q is %d wide (limit %d)", s, w, limit)
+	}
+	for line in ([?]string{"The", "Blue", "Room", "of", "SPLORR!!"}) { check(t, text, line, 62) } // shadowed by one pixel
+	for line in ([?]string{"lowrezjam-2025", "<space>"}) { check(t, small, line, 64) }
+	// "TheGrumpyGameDev" is 4 pixels too wide and is squeezed (write_centered_fitted)
+	testing.expect_value(t, game.text_width(small, "TheGrumpyGameDev"), 68)
+	for step in game.TUTORIAL_STEPS { for line in step.text { check(t, text, line, 64) } }
+	for item in ([?]string{"Tutorial", "Embark!", "Continue", "Abandon", "No", "Yes", "Abandon?", "Yer Dead!"}) { check(t, text, item, 64) }
+	check(t, small, "Use Potion?", 64)
+	for line in ([?]string{"You got", "a sword!", "a shield!", "Good to", "have a", "back-up!", "Yer sword", "broke!", "Equipping",
+		"next one!", "(10 left)", "Yer last", "Yer shield", "Save keys", "to open", "doors", "Blueberry", "(fer when", "yer",
+		"hungry!)", "Hungry?", "Blueberries", "satisfy!", "<space>", "to drink", "potion.", "+50 health", "you have", "100/100",
+		"You have", "no Potion", "Have you", "checked", "butthole?", "Room#15", "N00b", "Moonie", "hits", "for 20!", "85 left!",
+		"kills", "Moonie!", "N00b!"}) {
+		check(t, text, line, 64)
+	}
+	_ = too_wide
+}
+
+@(test)
+fitted_text_stays_inside_the_frame_and_still_draws_every_glyph :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	fonts := game.FONTS
+	small := &fonts[.Small]
+	game.fill_all(r.core, .Black)
+	game.write_centered_fitted(r.core, small, 32, 10, .White, "TheGrumpyGameDev", 64)
+	leftmost, rightmost, ink := 64, -1, 0
+	for y in 10 ..< 18 { for x in 0 ..< 64 {
+		if hue_at(r.core, x, y) == .White { ink += 1; leftmost = min(leftmost, x); rightmost = max(rightmost, x) }
+	} }
+	testing.expect(t, leftmost >= 0 && rightmost <= 63)
+	testing.expect(t, rightmost - leftmost >= 58) // nearly the whole width is used
+	// every glyph's pixels are there: the lit count equals the glyphs' own ink (squeezed glyphs must not overlap)
+	expected := 0
+	for char in transmute([]u8)string("TheGrumpyGameDev") {
+		for row in 0 ..< small.height {
+			bits := small.rows[(int(char) - small.first) * small.height + row]
+			for bit in 0 ..< 16 { if bits & (1 << uint(bit)) != 0 { expected += 1 } }
+		}
+	}
+	testing.expect_value(t, ink, expected)
+}

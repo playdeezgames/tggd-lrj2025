@@ -2,8 +2,6 @@ package game
 
 // The portable core. core_init once; core_step once per presented frame.
 //
-// MILESTONE 3: the screen is the in-play navigation picture of a fixed demo room; commands arrive with the rules.
-
 Core :: struct {
 	services: Services,
 	rng:      Rng,
@@ -11,6 +9,9 @@ Core :: struct {
 	frame:    [FRAME_WIDTH * FRAME_HEIGHT]u32, // hues converted to RGBA
 	dirty:    bool,
 	world:    World,
+	screen:   Screen,
+	menu_index:    int, // the highlighted item of a menu screen
+	tutorial_step: int,
 
 	sfx_queue: [SFX_QUEUE_SIZE]Sfx, // played by the platform after the step, in order
 	sfx_count: int,
@@ -21,7 +22,9 @@ core_init :: proc(core: ^Core, services: Services) {
 	seed: u64 = 0x5EED
 	if services.entropy != nil { seed = services.entropy() }
 	rng_seed(&core.rng, seed)
-	new_game(core)
+	world_clear(&core.world)
+	core.screen = .Title
+	core.dirty = true
 }
 
 core_step :: proc(core: ^Core, input: Step_Input, out: ^Step_Output) {
@@ -29,7 +32,7 @@ core_step :: proc(core: ^Core, input: Step_Input, out: ^Step_Output) {
 		handle_command(core, event.command)
 	}
 	if core.dirty {
-		draw_navigation(core)
+		draw_screen(core)
 		present(core)
 		core.dirty = false
 		out.frame_changed = true
@@ -42,14 +45,8 @@ core_step :: proc(core: ^Core, input: Step_Input, out: ^Step_Output) {
 	core.sfx_count = 0
 }
 
-handle_command :: proc(core: ^Core, command: Command) {
-	// milestone 3 draws a fixed picture; commands arrive with the rules
-	_ = core
-	_ = command
-}
-
 // Generates a fresh world (the Embark menu item). Retries with the generator moved on in the one case the original would
-// crash; gives up with an assertion after many tries, which would mean a bug.
+// crash; gives up with a panic after many tries, which would mean a bug.
 new_game :: proc(core: ^Core) {
 	for _ in 0 ..< 100 {
 		if generate_world(&core.world, &core.rng) {
@@ -97,5 +94,6 @@ debug_show_room :: proc(core: ^Core, map_type: Map_Type, x, y: int) {
 	stat_set(&world.characters[world.avatar].stats, .Health, 87)
 	stat_set(&world.characters[world.avatar].stats, .Satiety, 42)
 	stat_set(&world.characters[world.avatar].stats, .Shield_Durability, 3)
+	core.screen = .Navigation
 	core.dirty = true
 }

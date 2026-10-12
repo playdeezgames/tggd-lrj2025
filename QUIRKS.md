@@ -21,3 +21,5 @@ generated worlds in the port (`odin/tests`), not from the original, which has no
 | 13 | Moon people never move; they only strike back | `MoonPersonCharacterTypeDescriptor.OnMove` is empty | |
 | 14 | Stepping through a door puts you on the far tile without checking for an occupant (it would overwrite one) | `DoorLocationTypeDescriptor.Bump` | cannot happen: spawning keeps moon people off those tiles |
 | 15 | A moon person's sword and shield durability drift below zero as it fights (it has no minimum) | `OnHitEnemy`/`OnHitByEnemy` | no visible effect |
+| 16 | "N00b misses!" and "Moonie misses!" are one line wider than the 64-pixel screen and are clipped at both edges | `OnInteract` miss message, `MessageState` | the original's 6-pixel cells made them 72 and 84 wide; the port's font makes them 72 and 77, clipped the same way |
+| 17 | The title's "TheGrumpyGameDev" line was exactly 64 wide in the original's monospace font; in the port's proportional font it is 68, so the port squeezes one pixel of spacing out of four glyphs | `TitleState.Refresh`, `write_centered_fitted` | a port adaptation, not an original quirk |

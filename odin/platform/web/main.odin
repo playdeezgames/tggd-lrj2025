@@ -69,3 +69,13 @@ main :: proc() {
 	if core == nil { return }
 	game.debug_show_room(core, game.Map_Type(clamp(kind, 0, 2)), int(column), int(row))
 }
+
+// QA: feed one command (1 up, 2 down, 3 left, 4 right, 5 green, 6 red, 7 blue, 8 yellow) and step once, even when the
+// page's frame loop is not running (a hidden pane).
+@(export) platform_debug_press :: proc "c" (command: i32) {
+	context = runtime.default_context()
+	if core == nil { return }
+	events := [1]game.Input_Event{{command = game.Command(command)}}
+	game.core_step(core, {events = events[:]}, &out)
+	free_all(context.temp_allocator)
+}

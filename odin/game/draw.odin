@@ -69,3 +69,27 @@ text_width :: proc(font: ^Font, text: string) -> int {
 write_centered :: proc(core: ^Core, font: ^Font, x, y: int, hue: Hue, text: string) {
 	write_text(core, font, x - text_width(font, text) / 2, y, hue, text)
 }
+
+// Like write_centered, but when the text is wider than `limit` it takes one pixel of spacing out after enough glyphs,
+// spread evenly, to fit. (The original's monospace 3x5 font made "TheGrumpyGameDev" exactly 64 wide; the proportional
+// replacement is a few pixels wider.)
+write_centered_fitted :: proc(core: ^Core, font: ^Font, x, y: int, hue: Hue, text: string, limit: int) {
+	excess := text_width(font, text) - limit
+	if excess <= 0 {
+		write_centered(core, font, x, y, hue, text)
+		return
+	}
+	n := len(text)
+	step := max(n / excess, 1)
+	cx := x - (text_width(font, text) - excess) / 2
+	removed := 0
+	for i in 0 ..< n {
+		char := text[i]
+		write_glyph(core, font, cx, y, hue, char)
+		cx += glyph_advance(font, char)
+		if removed < excess && i % step == step - 1 {
+			cx -= 1
+			removed += 1
+		}
+	}
+}
