@@ -4,9 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
+(Status: shipped; the original source is deleted, see below.)
+
 "The Blue Room of SPLORR!!" (repo `tggd-lrj2025`, jam entry LRJ 2025): a turn-based maze crawl drawn on a **64x64 pixel buffer** using 10x10 1-bit sprite tiles. It is deployed at https://thegrumpygamedev.itch.io/tggd-lrj2025 as the VB.NET + Blazor WebAssembly build described below.
 
-**The goal is to rewrite it in Odin compiled to `js_wasm32`.** The VB.NET source in `src/` is the reference implementation (the "original"), the same way the other SPLORR!! ports treated their VB/C#/C++ originals. The author's knowledge base of earlier ports lives in the vault at `/home/yermom/git/bok-of-splorr/splorr` (an additional working directory). Read these before designing the rewrite:
+**The goal was to rewrite it in Odin compiled to `js_wasm32`, and that is done and shipped (October 12, 2026).** The VB.NET source (the "original") was the reference, as for the other SPLORR!! ports of VB/C#/C++ originals; it has since been deleted from the tree (see below). The author's knowledge base of earlier ports lives in the vault at `/home/yermom/git/bok-of-splorr/splorr` (an additional working directory). Read these before designing the rewrite:
 
 - `Tech/Odin wasm recipe.md` — build command, frame loop, 2D-canvas shim, the shared-framebuffer variant (Murder Hobo, Kordanor's Cabal), pure-logic + native tests variant (Roomba Rights).
 - `Gotchas.md` — wasm/Odin pitfalls (never import `core:os` in wasm code, seed the RNG and cap retry loops, read `e.key` before `e.code`, enum-keyed maps and JSON, `ODIN_TEST_THREADS=1`).
@@ -37,19 +39,9 @@ World model (`types.odin`, `world.odin`): one flat `World` of fixed arrays (maps
 
 Assets: the original's `Cy*` text fonts and `BlueRoom` sprites (in `Fonts.vb`) have questionable provenance and are **not ported; never regenerate from them**. Replacements are m3x6 (`Font_Id.Small`, HUD) and m5x7 (`.Text`, menus/messages/title, replaces CyFont8x8 too) by Daniel Linssen, and 10x10 sprites cut from the CC0 Bit Bonanza / Bountiful Bits sheets in this repo (floor and threat marker are hand-drawn). `tools/gen/gen_assets.py` (Pillow) generates `odin/game/font_data.odin`; `tools/test.sh` fails if it is stale. Sprite numbers (`Sprite` enum) keep the original's `Chr(n)` values. Fonts are proportional (per-glyph advance), unlike the original's monospace ones, so the original's pixel layouts need rechecking per screen. Credit Daniel Linssen and VEXED in the game. See `odin/assets/README.md`.
 
-## Commands (original VB.NET build, `src/`)
+## The original VB.NET build (deleted)
 
-There are no tests and no linter. The solution is `src/src.sln` (net9.0).
-
-```bash
-dotnet build src/src.sln                              # VB projects build with TreatWarningsAsErrors + OptionStrict On
-dotnet run --project src/TGGDLRJ2025                  # Blazor dev server at http://localhost:5029
-# (the old shippit.sh published the Blazor build; it now wraps tools/ship.sh, which ships the Odin build)
-```
-
-`shippit.sh` and `tools/ship.sh` publish to a public itch.io page (`thegrumpygamedev/tggd-lrj2025:html`) only with `--push`; without it they test, build and zip. Never push unless the user says to. (The original's `shippit.sh` published the Blazor build via `dotnet publish`; it is in git history.)
-
-`src/FontMaker` is a one-off console tool: it reads `source.png` (10x10 cells with 1px gutters, black = off) and writes glyph JSON for `TGGD.UI.FontData`.
+`src/` (VB.NET, Blazor WebAssembly, `src/src.sln`, net9.0) was deleted from the tree after the Odin port shipped on October 12, 2026. It is recoverable from git history: `git show 12900a0:src/<path>` or `git checkout 12900a0 -- src`. References below to VB files (`Home.razor`, `*Descriptor.vb`, ...) point into that snapshot; `QUIRKS.md` names the files each quirk came from. Its old `Fonts.vb` and `BlueRoom` sprites have questionable provenance and must not be ported or restored into the tree.
 
 ## Architecture of the original
 
@@ -72,7 +64,7 @@ Things that need several files to understand:
 - **Messages are modal.** Gameplay pushes `MessageData` (sfx + coloured `Mood` lines) onto `world.Messages`; `Neutral.DetermineState` returns `MessageState` while any are queued, `DeadState` if the avatar is dead, else `NavigationState`. Sfx are queued by name in `UIContext` and drained by the host after every command.
 - **UI is a pure state machine.** `IUIState.HandleCommand(command) -> IUIState` returns the next state; `Refresh()` draws into an `IUIBuffer(Of Integer)` of palette indices (24-colour `Palette` list in `Home.razor`). Input is reduced to 8 abstract `Command`s: Up/Down/Left/Right plus Green (space), Blue (enter), Yellow (tab), Red (backspace); WASD/QZ and arrows map to directions in `Home.razor`'s `CommandTable`. There is no real-time loop: one key press = one command = one refresh.
 - **Rendering is sprite fonts.** Sprites are "glyphs" of the `BlueRoom` font (10x10 glyph lines serialised in `TGGD.UI`'s `FontData`, produced from the Bit Bonanza / Bountiful Bits sheets at the repo root via `FontMaker`); `CyFont3x5` is the tiny text font for HUD numbers. `*DisplayProperties` map each type to a glyph + `Hue`. The Blazor host paints the 64x64 buffer as an HTML `<table>` of 4096 `<td>` cells, which is the main thing an Odin canvas rewrite replaces.
-- **Audio** is 12 `.wav` files in `src/TGGDLRJ2025/wwwroot/sfx/` played through `<audio>` elements by name (`sfx.js`).
+- **Audio** is 12 `.wav` files (now in `odin/platform/web/page/sfx/`) played through `<audio>` elements by name (`sfx.js`).
 
 ## Assets and licensing
 

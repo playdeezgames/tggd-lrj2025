@@ -1,5 +1,7 @@
 # Quirks of the original, preserved by the exact port
 
+(The VB.NET source these refer to was deleted from the tree on October 12, 2026; see it with `git show 12900a0:src/<path>`.)
+
 The port reproduces the VB.NET game's behaviour. Each item here is something odd the original does that the port keeps
 for now, to be **decided one at a time with the project owner** (keep, change, or remove). Percentages come from 500
 generated worlds in the port (`odin/tests`), not from the original, which has no tests.

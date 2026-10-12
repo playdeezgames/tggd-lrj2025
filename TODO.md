@@ -16,4 +16,4 @@ reachable from the title or main menu, or a line on the title screen) **and on t
 - [x] Pushed October 12, 2026 from commit `1579592` with `tools/ship.sh --push`: build #2112264 on `thegrumpygamedev/tggd-lrj2025:html` (replaced the Blazor build #1355397). Check `butler status thegrumpygamedev/tggd-lrj2025:html` for the processed tick.
 - [ ] After the push: paste `ITCH_DESCRIPTION.md`, set the embed square, check the live page.
 - [ ] Hear the sound effects in a visible tab, and try the touch controls on a real phone (neither was possible in the development pane).
-- [ ] Decide when to delete `src/` (the VB.NET reference), `Bit-Bonanza-*`/`Bountiful-Bits-*` stay (the generator reads them).
+- [x] `src/` (the VB.NET reference) deleted October 12, 2026; recover with `git show 12900a0:src/...`. `Bit-Bonanza-*`/`Bountiful-Bits-*` stay (the generator reads them).

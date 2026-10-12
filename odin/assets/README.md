@@ -1,6 +1,6 @@
 # Assets of the Odin port
 
-The original game's `Cy*` text fonts and `BlueRoom` sprite glyphs (embedded in `src/TGGDLRJ2025.UI/Font/Fonts.vb`) have
+The original game's `Cy*` text fonts and `BlueRoom` sprite glyphs (embedded in the deleted original's `src/TGGDLRJ2025.UI/Font/Fonts.vb`, last present at commit `12900a0`) have
 questionable provenance and are **not** ported. Replacements:
 
 | Asset | Source | Licence |

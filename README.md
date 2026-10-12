@@ -2,8 +2,8 @@
 
 A 64 by 64 pixel maze crawl for the Low-Rez Jam 2025 by TheGrumpyGameDev: https://thegrumpygamedev.itch.io/tggd-lrj2025
 
-The game is rebuilt in Odin and WebAssembly in `odin/`. The original VB.NET and Blazor version is kept in `src/` as the
-reference.
+The game is written in Odin and WebAssembly in `odin/`. It was rebuilt from a VB.NET and Blazor original, which was
+deleted from the tree on October 12, 2026 and lives in git history (`git show 12900a0:src/...`).
 
 ```bash
 tools/test.sh               # tests and a web build
