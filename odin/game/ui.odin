@@ -25,12 +25,15 @@ Menu :: struct {
 }
 
 MAIN_MENU_ITEMS := [?]string{"Tutorial", "Embark!"}
+MAIN_MENU_ITEMS_WITH_SAVE := [?]string{"Continue", "Tutorial", "Embark!"}
 GAME_MENU_ITEMS := [?]string{"Continue", "Abandon"}
 CONFIRM_ITEMS := [?]string{"No", "Yes"}
 
-menu_of :: proc(screen: Screen) -> Menu {
+menu_of :: proc(core: ^Core, screen: Screen) -> Menu {
 	#partial switch screen {
-	case .Main_Menu:       return {font = .Text, hue = .Light_Gray, items = MAIN_MENU_ITEMS[:]}
+	case .Main_Menu:
+		if core.has_save { return {font = .Text, hue = .Light_Gray, items = MAIN_MENU_ITEMS_WITH_SAVE[:]} }
+		return {font = .Text, hue = .Light_Gray, items = MAIN_MENU_ITEMS[:]}
 	case .Game_Menu:       return {font = .Text, hue = .Cyan, items = GAME_MENU_ITEMS[:]}
 	case .Confirm_Abandon: return {font = .Text, hue = .Light_Gray, items = CONFIRM_ITEMS[:], caption = "Abandon?", caption_hue = .Red}
 	case .Confirm_Potion:  return {font = .Small, hue = .Light_Gray, items = CONFIRM_ITEMS[:], caption = "Use Potion?", caption_hue = .Yellow}
@@ -91,10 +94,14 @@ handle_command :: proc(core: ^Core, command: Command) {
 	case .Main_Menu:
 		if menu_navigate(core, command) { break }
 		if command == .Green {
-			if core.menu_index == 0 { // Tutorial
+			item := menu_of(core, .Main_Menu).items[core.menu_index]
+			switch item {
+			case "Continue":
+				enter_neutral(core)
+			case "Tutorial":
 				enter(core, .Tutorial)
 				core.tutorial_step = 0
-			} else { // Embark!
+			case "Embark!":
 				new_game(core)
 				enter_neutral(core)
 			}
@@ -158,7 +165,7 @@ handle_command :: proc(core: ^Core, command: Command) {
 
 // Up and Down move the highlight with wrap-around. Returns true when the command was one of them.
 menu_navigate :: proc(core: ^Core, command: Command) -> bool {
-	count := len(menu_of(core.screen).items)
+	count := len(menu_of(core, core.screen).items)
 	#partial switch command {
 	case .Up:
 		core.menu_index = (core.menu_index + count - 1) % count
@@ -205,7 +212,7 @@ draw_title :: proc(core: ^Core) {
 }
 
 draw_menu :: proc(core: ^Core) {
-	menu := menu_of(core.screen)
+	menu := menu_of(core, core.screen)
 	font := &FONTS[menu.font]
 	fill_all(core, .Black)
 	y := FRAME_HEIGHT / 2 - font.height / 2 - font.height * core.menu_index // the highlighted item sits mid-screen

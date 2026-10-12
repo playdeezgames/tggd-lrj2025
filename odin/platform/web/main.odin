@@ -77,5 +77,6 @@ main :: proc() {
 	if core == nil { return }
 	events := [1]game.Input_Event{{command = game.Command(command)}}
 	game.core_step(core, {events = events[:]}, &out)
+	core.dirty = true // so the next real frame repaints even though this step consumed the change
 	free_all(context.temp_allocator)
 }

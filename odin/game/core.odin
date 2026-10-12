@@ -13,6 +13,9 @@ Core :: struct {
 	menu_index:    int, // the highlighted item of a menu screen
 	tutorial_step: int,
 
+	has_save:  bool, // a valid save is in storage: the main menu offers Continue
+	save_buf:  [SAVE_BUFFER_SIZE]u8,
+
 	sfx_queue: [SFX_QUEUE_SIZE]Sfx, // played by the platform after the step, in order
 	sfx_count: int,
 }
@@ -23,14 +26,18 @@ core_init :: proc(core: ^Core, services: Services) {
 	if services.entropy != nil { seed = services.entropy() }
 	rng_seed(&core.rng, seed)
 	world_clear(&core.world)
+	load_save(core)
 	core.screen = .Title
 	core.dirty = true
 }
 
 core_step :: proc(core: ^Core, input: Step_Input, out: ^Step_Output) {
+	processed := false
 	for event in input.events {
+		if event.command != .None { processed = true }
 		handle_command(core, event.command)
 	}
+	if processed { persist(core) } // every turn is saved
 	if core.dirty {
 		draw_screen(core)
 		present(core)
@@ -43,6 +50,38 @@ core_step :: proc(core: ^Core, input: Step_Input, out: ^Step_Output) {
 	out.sfx = core.sfx_queue
 	out.sfx_count = core.sfx_count
 	core.sfx_count = 0
+}
+
+// Reads the save, if any, into the world. A save that does not validate is ignored whole (and left in storage).
+load_save :: proc(core: ^Core) {
+	if core.services.storage_get == nil { return }
+	text, found := core.services.storage_get(SAVE_KEY, context.temp_allocator)
+	if !found { return }
+	loaded := new(World)
+	defer free(loaded)
+	if decode_world(text, loaded) {
+		core.world = loaded^
+		core.has_save = true
+	}
+}
+
+// After a command: the world in play is stored; a finished or abandoned one is removed (at the moment of death, not
+// when the death screen is dismissed).
+persist :: proc(core: ^Core) {
+	if core.services.storage_set == nil || core.services.storage_remove == nil { return }
+	world := &core.world
+	if world.avatar == NONE || is_dead(world, world.avatar) {
+		core.services.storage_remove(SAVE_KEY)
+		core.has_save = false
+		return
+	}
+	text, ok := encode_world(world, core.save_buf[:])
+	if !ok {
+		if core.services.log != nil { core.services.log("save: world did not fit the buffer") }
+		return
+	}
+	core.has_save = core.services.storage_set(SAVE_KEY, text)
+	if !core.has_save && core.services.log != nil { core.services.log("save: storage refused the write") }
 }
 
 // Generates a fresh world (the Embark menu item). Retries with the generator moved on in the one case the original would

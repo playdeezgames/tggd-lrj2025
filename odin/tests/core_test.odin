@@ -1,6 +1,7 @@
 #+build !js
 package tests
 
+import "base:runtime"
 import "core:fmt"
 import "core:testing"
 import "tggd:game"
@@ -1097,4 +1098,270 @@ fitted_text_stays_inside_the_frame_and_still_draws_every_glyph :: proc(t: ^testi
 		}
 	}
 	testing.expect_value(t, ink, expected)
+}
+
+// ---- saving ---------------------------------------------------------------------------------------------
+// A one-slot fake of browser storage (a game only ever uses one key).
+Fake_Store :: struct {
+	key:     [64]u8,
+	key_len: int,
+	value:   [game.SAVE_BUFFER_SIZE]u8,
+	len:     int,
+	has:     bool,
+	writes:  int,
+	removes: int,
+	refuse:  bool, // quota exceeded
+}
+store: Fake_Store
+
+store_reset :: proc() { store = {} }
+
+store_get :: proc(key: string, allocator: runtime.Allocator) -> (value: string, ok: bool) {
+	if !store.has || key != string(store.key[:store.key_len]) { return "", false }
+	buf := make([]u8, store.len, allocator)
+	copy(buf, store.value[:store.len])
+	return string(buf), true
+}
+
+store_set :: proc(key, value: string) -> bool {
+	if store.refuse { return false }
+	copy(store.key[:], key)
+	store.key_len = len(key)
+	copy(store.value[:], value)
+	store.len = len(value)
+	store.has = true
+	store.writes += 1
+	return true
+}
+
+store_remove :: proc(key: string) {
+	store.has = false
+	store.removes += 1
+}
+
+saving_rig :: proc() -> Rig {
+	r := Rig{core = new(game.Core)}
+	game.core_init(r.core, {
+		entropy = proc() -> u64 { return 5 },
+		storage_get = store_get, storage_set = store_set, storage_remove = store_remove,
+	})
+	game.core_step(r.core, {}, &r.out)
+	return r
+}
+
+stored :: proc() -> string { return string(store.value[:store.len]) }
+
+@(test)
+the_world_round_trips_through_a_save_exactly :: proc(t: ^testing.T) {
+	for seed in 0 ..< u64(10) {
+		w := gen(seed + 400); defer free(w)
+		// play a while so there are spent doors, dead moon people, held items, tags and queued messages
+		r := rig_new(); defer rig_free(&r)
+		r.core.world = w^
+		rng: game.Rng
+		game.rng_seed(&rng, seed)
+		for _ in 0 ..< 400 {
+			if game.is_dead(&r.core.world, r.core.world.avatar) { break }
+			game.attempt_move(r.core, r.core.world.avatar, game.Direction(game.rng_range(&rng, 0, 3)))
+			if game.rng_range(&rng, 0, 3) != 0 { for game.has_messages(&r.core.world) { game.dismiss_message(&r.core.world) } }
+		}
+		if game.is_dead(&r.core.world, r.core.world.avatar) { continue }
+		buf := make([]u8, game.SAVE_BUFFER_SIZE); defer delete(buf)
+		text, ok := game.encode_world(&r.core.world, buf)
+		testing.expect(t, ok)
+		back := new(game.World); defer free(back)
+		testing.expect(t, game.decode_world(text, back))
+		testing.expect(t, back^ == r.core.world)
+		free_all(context.temp_allocator)
+	}
+}
+
+@(test)
+a_fresh_world_save_is_well_under_the_buffer :: proc(t: ^testing.T) {
+	w := gen(1); defer free(w)
+	buf := make([]u8, game.SAVE_BUFFER_SIZE); defer delete(buf)
+	text, ok := game.encode_world(w, buf)
+	testing.expect(t, ok)
+	testing.expect(t, len(text) < 100 * 1024)
+	testing.expect(t, len(text) > 1000)
+	testing.expect_value(t, text[:len(game.SAVE_HEADER)], game.SAVE_HEADER)
+}
+
+@(test)
+every_turn_is_saved_under_a_namespaced_key_and_death_or_abandoning_removes_it :: proc(t: ^testing.T) {
+	store_reset()
+	r := saving_rig(); defer rig_free(&r)
+	testing.expect(t, game.SAVE_KEY == "tggd-lrj2025:save")
+	testing.expect_value(t, store.writes, 0)
+	press_all(&r, .Green, .Down, .Green) // embark
+	testing.expect(t, store.has)
+	writes := store.writes
+	press_all(&r, .Right)
+	testing.expect_value(t, store.writes, writes + 1) // a move is a turn
+	testing.expect_value(t, string(store.key[:store.key_len]), "tggd-lrj2025:save")
+	// abandon removes it at once
+	press_all(&r, .Red, .Down, .Green, .Down, .Green)
+	testing.expect_value(t, r.core.screen, game.Screen.Main_Menu)
+	testing.expect(t, !store.has)
+	testing.expect(t, !r.core.has_save)
+}
+
+@(test)
+dying_removes_the_save_before_the_death_screen :: proc(t: ^testing.T) {
+	store_reset()
+	r := saving_rig(); defer rig_free(&r)
+	press_all(&r, .Green, .Down, .Green) // a real game, saved
+	testing.expect(t, store.has)
+	c := r.core
+	loc := int(c.world.characters[c.world.avatar].location)
+	// weaken the player and stand a moon person on a free neighbour, then attack it
+	game.stat_set(&c.world.characters[c.world.avatar].stats, .Health, 10)
+	attack := game.Command.None
+	cmd := [game.Direction]game.Command{.North = .Up, .East = .Right, .South = .Down, .West = .Left}
+	for d in game.Direction {
+		n := game.location_neighbor(&c.world, loc, d)
+		if n != game.NONE && !game.is_solid(c.world.locations[n].location_type) && c.world.locations[n].character == game.NONE {
+			game.add_character(&c.world, .Moon_Person, n)
+			attack = cmd[d]
+			break
+		}
+	}
+	testing.expect(t, attack != .None)
+	press_all(&r, attack)
+	testing.expect(t, game.is_dead(&c.world, c.world.avatar))
+	testing.expect(t, !store.has) // gone while the death messages are still on screen
+	testing.expect_value(t, c.screen, game.Screen.Message)
+}
+
+@(test)
+continue_appears_only_with_a_valid_save_and_resumes_the_same_world :: proc(t: ^testing.T) {
+	store_reset()
+	first := saving_rig()
+	press_all(&first, .Green, .Down, .Green)
+	for _ in 0 ..< 30 { press_all(&first, .Right, .Down, .Left, .Up) ; for first.core.screen == .Message { press_all(&first, .Green) } }
+	reference := first.core.world
+	rig_free(&first)
+	testing.expect(t, store.has)
+
+	again := saving_rig(); defer rig_free(&again)
+	testing.expect(t, again.core.has_save)
+	press_all(&again, .Green) // title -> main menu
+	menu := game.menu_of(again.core, .Main_Menu)
+	testing.expect_value(t, len(menu.items), 3)
+	testing.expect_value(t, menu.items[0], "Continue")
+	testing.expect_value(t, press_all(&again, .Green), game.Screen.Navigation)
+	testing.expect(t, again.core.world == reference)
+}
+
+@(test)
+a_pending_message_comes_back_as_the_message_screen :: proc(t: ^testing.T) {
+	store_reset()
+	first := saving_rig()
+	press_all(&first, .Green, .Down, .Green)
+	// make the next move produce a message: put a potion under the next tile's feet is overkill; add one directly
+	game.add_message(first.core, first.core.world.avatar, .Take, "Hello", "again")
+	first.core.screen = .Message
+	press_all(&first, .Up) // any command counts as a turn and saves
+	rig_free(&first)
+	again := saving_rig(); defer rig_free(&again)
+	press_all(&again, .Green, .Green)
+	testing.expect_value(t, again.core.screen, game.Screen.Message)
+	testing.expect_value(t, game.current_message_line(&again.core.world, 0), "Hello")
+	testing.expect_value(t, again.core.world.messages[0].sfx, game.Sfx.Take)
+}
+
+@(test)
+a_damaged_save_is_ignored_whole_and_left_alone :: proc(t: ^testing.T) {
+	w := gen(9); defer free(w)
+	buf := make([]u8, game.SAVE_BUFFER_SIZE); defer delete(buf)
+	good, _ := game.encode_world(w, buf)
+	probe := new(game.World); defer free(probe)
+	testing.expect(t, game.decode_world(good, probe))
+
+	bad_cases := [?]string{
+		"", "garbage", "TGGDLRJ2025-SAVE-2\n16 0 1 2",
+		good[:len(good) / 2],            // truncated
+		good[:len(good) - 3],            // truncated at the end
+	}
+	for text in bad_cases { testing.expect(t, !game.decode_world(text, probe)) }
+
+	// single-token damage: replace one number with an out-of-range or malformed one, many places
+	text := make([]u8, len(good)); defer delete(text)
+	rng: game.Rng
+	game.rng_seed(&rng, 99)
+	accepted_damaged := 0
+	for _ in 0 ..< 400 {
+		copy(text, good)
+		at := game.rng_range(&rng, len(game.SAVE_HEADER) + 1, len(text) - 1)
+		switch game.rng_range(&rng, 0, 2) {
+		case 0: text[at] = 'x'
+		case 1: text[at] = '9'
+		case 2: text[at] = '-'
+		}
+		// whatever happens, it must not crash; if it is accepted it must still be a fully valid world
+		if game.decode_world(string(text), probe) {
+			accepted_damaged += 1
+			testing.expect(t, game.validate_world(probe))
+		}
+	}
+	testing.expect(t, accepted_damaged < 400) // most damage is caught
+
+	// a save that is damaged at load leaves the game untouched and offers no Continue
+	store_reset()
+	store_set(game.SAVE_KEY, string(good[:len(good) / 2]))
+	r := saving_rig(); defer rig_free(&r)
+	testing.expect(t, !r.core.has_save)
+	testing.expect_value(t, r.core.world.avatar, game.NONE)
+	testing.expect(t, store.has) // not deleted
+	press_all(&r, .Green)
+	testing.expect_value(t, len(game.menu_of(r.core, .Main_Menu).items), 2)
+}
+
+@(test)
+semantic_damage_is_caught_not_just_syntax :: proc(t: ^testing.T) {
+	w := gen(21); defer free(w)
+	probe := new(game.World); defer free(probe)
+	buf := make([]u8, game.SAVE_BUFFER_SIZE); defer delete(buf)
+
+	try :: proc(t: ^testing.T, w: ^game.World, buf: []u8, probe: ^game.World, what: string) {
+		text, ok := game.encode_world(w, buf)
+		testing.expect(t, ok)
+		testing.expectf(t, !game.decode_world(text, probe), "accepted a save with %s", what)
+	}
+	// each case damages a copy of a good world, then saves it as-is (the text is syntactically perfect)
+	damage :: proc(w: ^game.World, f: proc(^game.World)) -> ^game.World {
+		c := new(game.World)
+		c^ = w^
+		f(c)
+		return c
+	}
+	c := damage(w, proc(c: ^game.World) { c.avatar = 2 }); try(t, c, buf, probe, "the avatar set to a moon person"); free(c)
+	c = damage(w, proc(c: ^game.World) { c.locations[game.location_id(2, 3, 3)].location_type = .Gray_Wall }); try(t, c, buf, probe, "a wall in a room floor"); free(c)
+	c = damage(w, proc(c: ^game.World) { c.locations[game.location_id(3, 7, 0)].destination = game.NONE }); try(t, c, buf, probe, "a door with no destination"); free(c)
+	c = damage(w, proc(c: ^game.World) { c.characters[c.avatar].location = 7 }); try(t, c, buf, probe, "the avatar not on its tile"); free(c)
+	c = damage(w, proc(c: ^game.World) { c.items[0].holder = .Character; c.items[0].holder_id = 63 }); try(t, c, buf, probe, "an item held by nobody"); free(c)
+	c = damage(w, proc(c: ^game.World) { c.map_types[5] = .Starting_Room }); try(t, c, buf, probe, "two starting rooms"); free(c)
+	c = damage(w, proc(c: ^game.World) { game.stat_set(&c.characters[c.avatar].stats, .Health, 0) }); try(t, c, buf, probe, "a dead avatar"); free(c)
+}
+
+@(test)
+embarking_over_a_save_replaces_it_and_a_full_storage_does_not_stop_play :: proc(t: ^testing.T) {
+	store_reset()
+	first := saving_rig()
+	press_all(&first, .Green, .Down, .Green)
+	rig_free(&first)
+	old_len := store.len
+	again := saving_rig(); defer rig_free(&again)
+	press_all(&again, .Green, .Down, .Down, .Green) // Continue, Tutorial, Embark!
+	testing.expect_value(t, again.core.screen, game.Screen.Navigation)
+	testing.expect(t, store.has)
+	_ = old_len
+	// quota exceeded: play goes on, nothing is stored, and Continue is not offered afterwards
+	store_reset()
+	store.refuse = true
+	r := saving_rig(); defer rig_free(&r)
+	testing.expect_value(t, press_all(&r, .Green, .Down, .Green), game.Screen.Navigation)
+	press_all(&r, .Right, .Right)
+	testing.expect(t, !store.has)
+	testing.expect(t, !r.core.has_save)
 }
