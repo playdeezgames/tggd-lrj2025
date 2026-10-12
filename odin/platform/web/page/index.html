@@ -6,8 +6,16 @@
 	html, body { margin: 0; height: 100%; overflow: hidden; background: #111; overscroll-behavior: none; touch-action: none;
 		-webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 	#screen { position: absolute; image-rendering: pixelated; touch-action: none; }
+	#pads { position: absolute; inset: 0; display: none; pointer-events: none; }
+	.pad { position: absolute; pointer-events: auto; touch-action: none; border: 2px solid #555; border-radius: 14px;
+		background: #1c1c1c; color: #bbb; font: bold 16px sans-serif; padding: 0; cursor: pointer; }
+	.pad.down { background: #3a3a3a; color: #fff; border-color: #aaa; }
+	.pad-green { border-color: #2a7; color: #5d9; }
+	.pad-red { border-color: #a33; color: #e66; }
 </style>
 <canvas id="screen" width="64" height="64"></canvas>
+<div id="pads"></div>
 <script src="odin.js"></script>
 <script src="storage.js"></script>
+<script src="input.js"></script>
 <script src="platform.js"></script>

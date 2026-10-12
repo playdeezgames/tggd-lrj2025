@@ -1,7 +1,6 @@
 // Browser side of the platform interface: draw one RGBA frame, turn keys into commands, store text.
 (async function () {
 	const FRAME_W = 64, FRAME_H = 64;
-	const COMMAND = { up: 1, down: 2, left: 3, right: 4, green: 5, red: 6, blue: 7, yellow: 8 };
 	const debugLog = new URLSearchParams(location.search).has("log"); // ?log=1 prints every input sent to the game
 	const logInput = (...a) => { if (debugLog) console.log("[input]", ...a); };
 
@@ -22,36 +21,103 @@
 	const exports = mem.exports;
 
 	// ---- layout: the largest whole multiple of the frame that fits, else a smooth fit; centred ---------------
+	// With touch controls showing, either they sit in the side margins (a wide window) or a band is kept free below.
 	const canvas = document.getElementById("screen"), ctx = canvas.getContext("2d");
+	const pads = document.getElementById("pads");
+	let touchControls = matchMedia("(pointer: coarse)").matches; // shown at once on phones, after the first touch elsewhere
 	let laidOutFor = "";
 	function layout() {
 		const w = innerWidth, h = innerHeight;
-		laidOutFor = w + "x" + h;
+		laidOutFor = w + "x" + h + (touchControls ? "t" : "");
 		if (w === 0 || h === 0) return;
-		let scale = Math.min(w / FRAME_W, h / FRAME_H);
+		let areaW = w, areaH = h, padsMode = "";
+		if (touchControls) {
+			if ((w - h) / 2 >= 150) { padsMode = "sides"; areaW = h; }          // a square canvas, controls left and right
+			else { padsMode = "band"; areaH = h - Math.min(Math.round(h * 0.4), 260); } // controls in a band below
+		}
+		let scale = Math.min(areaW / FRAME_W, areaH / FRAME_H);
 		if (scale >= 1) scale = Math.floor(scale);
 		const cw = Math.floor(FRAME_W * scale), ch = Math.floor(FRAME_H * scale);
+		const left = Math.floor((w - cw) / 2), top = Math.floor((areaH - ch) / 2);
 		canvas.style.width = cw + "px"; canvas.style.height = ch + "px";
-		canvas.style.left = Math.floor((w - cw) / 2) + "px"; canvas.style.top = Math.floor((h - ch) / 2) + "px";
+		canvas.style.left = left + "px"; canvas.style.top = top + "px";
+		layoutPads(padsMode, w, h, left, cw, areaH);
 	}
-	addEventListener("resize", layout); layout();
+	addEventListener("resize", layout);
 
-	// ---- input. The original's table (Pages/Home.razor CommandTable), matched on the logical key e.key. -----
-	// Case-sensitive like the original (Shift or Caps Lock stops letters working): a quirk to decide later.
-	// Held keys repeat, as in the original. Remote desktops can send wrong e.code values, so e.key comes first.
-	const KEYS_BY_KEY = {
-		q: "left", z: "up", w: "up", a: "left", s: "down", d: "right",
-		ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
-		" ": "green", Enter: "blue", Tab: "yellow", Backspace: "red",
-	};
+	// ---- touch controls: a d-pad that repeats while held, and the two action buttons ------------------------
+	const padButtons = {};
+	function makeButton(name, label, command, repeat) {
+		const b = document.createElement("button");
+		b.className = "pad pad-" + name;
+		b.textContent = label;
+		b.setAttribute("aria-label", name);
+		let timer = 0, interval = 0;
+		const stop = () => { clearTimeout(timer); clearInterval(interval); b.classList.remove("down"); };
+		b.addEventListener("pointerdown", (e) => {
+			e.preventDefault();
+			try { b.setPointerCapture(e.pointerId); } catch (err) {}
+			b.classList.add("down");
+			logInput("pad", name);
+			exports.platform_command(command);
+			if (repeat) timer = setTimeout(() => { interval = setInterval(() => exports.platform_command(command), 110); }, 380);
+		});
+		for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) b.addEventListener(type, stop);
+		b.addEventListener("contextmenu", (e) => e.preventDefault());
+		pads.appendChild(b);
+		padButtons[name] = b;
+	}
+	makeButton("up", "\u25B2", COMMAND.up, true);
+	makeButton("left", "\u25C0", COMMAND.left, true);
+	makeButton("right", "\u25B6", COMMAND.right, true);
+	makeButton("down", "\u25BC", COMMAND.down, true);
+	makeButton("green", "OK", COMMAND.green, false);
+	makeButton("red", "BACK", COMMAND.red, false);
+
+	function layoutPads(mode, w, h, canvasLeft, canvasW, areaH) {
+		pads.style.display = mode ? "block" : "none";
+		if (!mode) return;
+		// the d-pad is a 3 by 3 grid of cells; the buttons are two cells stacked
+		let cell, dx, dy, bx, by, stack;
+		if (mode === "sides") {
+			cell = Math.min(Math.floor(canvasLeft / 3.4), 90);
+			dx = Math.floor((canvasLeft - cell * 3) / 2); dy = Math.floor((h - cell * 3) / 2);
+			bx = canvasLeft + canvasW + Math.floor((canvasLeft - cell * 1.6) / 2); by = Math.floor((h - cell * 3.4) / 2); stack = true;
+		} else {
+			const band = h - areaH;
+			cell = Math.min(Math.floor(band / 3.3), Math.floor(w / 7), 84);
+			dx = Math.max(Math.floor(w * 0.04), 8); dy = areaH + Math.floor((band - cell * 3) / 2);
+			bx = w - Math.max(Math.floor(w * 0.04), 8) - Math.floor(cell * 1.7); by = areaH + Math.floor((band - cell * 3.4) / 2); stack = true;
+		}
+		const place = (name, x, y, wd, ht) => {
+			const s = padButtons[name].style;
+			s.left = x + "px"; s.top = y + "px"; s.width = wd + "px"; s.height = ht + "px"; s.fontSize = Math.floor(cell * 0.38) + "px";
+		};
+		place("up", dx + cell, dy, cell, cell);
+		place("left", dx, dy + cell, cell, cell);
+		place("right", dx + cell * 2, dy + cell, cell, cell);
+		place("down", dx + cell, dy + cell * 2, cell, cell);
+		const bw = Math.floor(cell * 1.7), bh = Math.floor(cell * 1.5);
+		place("green", bx, by, bw, bh);
+		place("red", bx, by + bh + Math.floor(cell * 0.4), bw, bh);
+	}
+
+	// ---- input. The original's key table (input.js), matched on the logical key e.key: remote desktops can send ----
+	// wrong e.code values. Held keys repeat, as in the original.
 	addEventListener("keydown", (e) => {
-		const name = KEYS_BY_KEY[e.key];
+		const name = commandForKey(e.key, e);
 		if (!name) return;
 		e.preventDefault();
 		logInput("key", e.key, e.code, "->", name);
 		exports.platform_command(COMMAND[name]);
 	});
 	addEventListener("contextmenu", (e) => e.preventDefault());
+	// the first touch anywhere shows the controls on a laptop with a touch screen; a click focuses the page (itch.io iframe)
+	addEventListener("pointerdown", (e) => {
+		try { window.focus(); } catch (err) {}
+		if (e.pointerType === "touch" && !touchControls) { touchControls = true; layout(); }
+	}, true);
+	layout();
 
 	// ---- sound: the core owns the file table; one Audio element per effect, restarted on each play (as the original) ----
 	const sounds = [];

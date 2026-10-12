@@ -6,7 +6,7 @@ generated worlds in the port (`odin/tests`), not from the original, which has no
 
 | # | Quirk | Where | Notes |
 | --- | --- | --- | --- |
-| 1 | Letter keys are case-sensitive: Caps Lock or Shift disables WASD/QZ | `Home.razor` CommandTable, `page/platform.js` | q is Left and z is Up (an AZERTY-ish table), as in the original |
+| 1 | ~~Letter keys are case-sensitive: Caps Lock or Shift disables WASD/QZ~~ **DECIDED (Oct 12, 2026): ignore case** | `Home.razor` CommandTable, `page/input.js` | q is Left and z is Up (an AZERTY-ish table), kept; Ctrl/Alt/Meta combinations are left to the browser |
 | 2 | Moon people can spawn in the starting room (about 93% of worlds) and the ending room (about 94%) | `MoonPersonCharacterTypeDescriptor.CanSpawn` | it only excludes solid tiles, occupied tiles and the four tiles just inside each wall's door |
 | 3 | About 4% of worlds start with a moon person next to the player | same | an attack of opportunity follows the first move |
 | 4 | About half of the worlds (265 of 500) have a door that leads back into its own room | `WorldInitializer.InitializeSidePaths` | the candidate list for a side path includes the room itself; avg 1.5 such doors per world |
@@ -23,3 +23,12 @@ generated worlds in the port (`odin/tests`), not from the original, which has no
 | 15 | A moon person's sword and shield durability drift below zero as it fights (it has no minimum) | `OnHitEnemy`/`OnHitByEnemy` | no visible effect |
 | 16 | "N00b misses!" and "Moonie misses!" are one line wider than the 64-pixel screen and are clipped at both edges | `OnInteract` miss message, `MessageState` | the original's 6-pixel cells made them 72 and 84 wide; the port's font makes them 72 and 77, clipped the same way |
 | 17 | The title's "TheGrumpyGameDev" line was exactly 64 wide in the original's monospace font; in the port's proportional font it is 68, so the port squeezes one pixel of spacing out of four glyphs | `TitleState.Refresh`, `write_centered_fitted` | a port adaptation, not an original quirk |
+
+## Decided changes from the original
+
+| Date | Change | Why |
+| --- | --- | --- |
+| 2026-10-12 | Letter keys ignore case (quirk 1) | Caps Lock silently disabled the controls |
+| 2026-10-12 | Saving added (autosave each turn, Continue item, save removed on death or abandon) | not in the original; the owner's request |
+| 2026-10-12 | Embark with a saved game asks "Lose save?" first | a misclick would lose a game in progress |
+| 2026-10-12 | On-screen touch controls | phones have no keyboard |

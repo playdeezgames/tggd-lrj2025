@@ -1064,7 +1064,7 @@ every_screen_draws_something_and_text_that_fit_the_original_still_fits :: proc(t
 	// "TheGrumpyGameDev" is 4 pixels too wide and is squeezed (write_centered_fitted)
 	testing.expect_value(t, game.text_width(small, "TheGrumpyGameDev"), 68)
 	for step in game.TUTORIAL_STEPS { for line in step.text { check(t, text, line, 64) } }
-	for item in ([?]string{"Tutorial", "Embark!", "Continue", "Abandon", "No", "Yes", "Abandon?", "Yer Dead!"}) { check(t, text, item, 64) }
+	for item in ([?]string{"Tutorial", "Embark!", "Continue", "Abandon", "No", "Yes", "Abandon?", "Yer Dead!", "Lose save?"}) { check(t, text, item, 64) }
 	check(t, small, "Use Potion?", 64)
 	for line in ([?]string{"You got", "a sword!", "a shield!", "Good to", "have a", "back-up!", "Yer sword", "broke!", "Equipping",
 		"next one!", "(10 left)", "Yer last", "Yer shield", "Save keys", "to open", "doors", "Blueberry", "(fer when", "yer",
@@ -1352,7 +1352,13 @@ embarking_over_a_save_replaces_it_and_a_full_storage_does_not_stop_play :: proc(
 	rig_free(&first)
 	old_len := store.len
 	again := saving_rig(); defer rig_free(&again)
-	press_all(&again, .Green, .Down, .Down, .Green) // Continue, Tutorial, Embark!
+	press_all(&again, .Green, .Down, .Down, .Green) // Continue, Tutorial, Embark!: asks first
+	testing.expect_value(t, again.core.screen, game.Screen.Confirm_Embark)
+	testing.expect_value(t, press_all(&again, .Green), game.Screen.Main_Menu) // No is first
+	testing.expect_value(t, again.core.has_save, true)
+	press_all(&again, .Down, .Down, .Green, .Red) // ask again, cancel with Red
+	testing.expect_value(t, again.core.screen, game.Screen.Main_Menu)
+	press_all(&again, .Down, .Down, .Green, .Down, .Green) // ask again, Yes
 	testing.expect_value(t, again.core.screen, game.Screen.Navigation)
 	testing.expect(t, store.has)
 	_ = old_len

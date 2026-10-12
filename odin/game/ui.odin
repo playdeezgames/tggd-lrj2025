@@ -13,6 +13,7 @@ Screen :: enum u8 {
 	Game_Menu,
 	Confirm_Abandon,
 	Confirm_Potion,
+	Confirm_Embark, // only when a saved game would be replaced
 }
 
 // ---- menus (PickerState) -------------------------------------------------------------------------------
@@ -36,6 +37,7 @@ menu_of :: proc(core: ^Core, screen: Screen) -> Menu {
 		return {font = .Text, hue = .Light_Gray, items = MAIN_MENU_ITEMS[:]}
 	case .Game_Menu:       return {font = .Text, hue = .Cyan, items = GAME_MENU_ITEMS[:]}
 	case .Confirm_Abandon: return {font = .Text, hue = .Light_Gray, items = CONFIRM_ITEMS[:], caption = "Abandon?", caption_hue = .Red}
+	case .Confirm_Embark:  return {font = .Text, hue = .Light_Gray, items = CONFIRM_ITEMS[:], caption = "Lose save?", caption_hue = .Red}
 	case .Confirm_Potion:  return {font = .Small, hue = .Light_Gray, items = CONFIRM_ITEMS[:], caption = "Use Potion?", caption_hue = .Yellow}
 	}
 	return {}
@@ -43,7 +45,7 @@ menu_of :: proc(core: ^Core, screen: Screen) -> Menu {
 
 is_menu :: proc(screen: Screen) -> bool {
 	#partial switch screen {
-	case .Main_Menu, .Game_Menu, .Confirm_Abandon, .Confirm_Potion: return true
+	case .Main_Menu, .Game_Menu, .Confirm_Abandon, .Confirm_Potion, .Confirm_Embark: return true
 	}
 	return false
 }
@@ -102,8 +104,12 @@ handle_command :: proc(core: ^Core, command: Command) {
 				enter(core, .Tutorial)
 				core.tutorial_step = 0
 			case "Embark!":
-				new_game(core)
-				enter_neutral(core)
+				if core.has_save {
+					enter(core, .Confirm_Embark) // a saved game would be lost
+				} else {
+					new_game(core)
+					enter_neutral(core)
+				}
 			}
 		}
 	case .Tutorial:
@@ -147,6 +153,18 @@ handle_command :: proc(core: ^Core, command: Command) {
 		case .Green:
 			if core.menu_index == 1 { abandon(core) } else { enter(core, .Game_Menu) } // Yes / No
 		}
+	case .Confirm_Embark:
+		if menu_navigate(core, command) { break }
+		#partial switch command {
+		case .Red: enter(core, .Main_Menu)
+		case .Green:
+			if core.menu_index == 1 {
+				new_game(core)
+				enter_neutral(core)
+			} else {
+				enter(core, .Main_Menu)
+			}
+		}
 	case .Confirm_Potion:
 		if menu_navigate(core, command) { break }
 		#partial switch command {
@@ -181,7 +199,7 @@ menu_navigate :: proc(core: ^Core, command: Command) -> bool {
 draw_screen :: proc(core: ^Core) {
 	switch core.screen {
 	case .Title:      draw_title(core)
-	case .Main_Menu, .Game_Menu, .Confirm_Abandon, .Confirm_Potion: draw_menu(core)
+	case .Main_Menu, .Game_Menu, .Confirm_Abandon, .Confirm_Potion, .Confirm_Embark: draw_menu(core)
 	case .Tutorial:   draw_tutorial(core)
 	case .Navigation: draw_navigation(core)
 	case .Message:    draw_message(core)
