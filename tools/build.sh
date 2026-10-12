@@ -5,5 +5,6 @@ cd "$(dirname "$0")/.."
 mkdir -p build/web
 odin build odin/platform/web -target:js_wasm32 -out:build/web/platform.wasm -collection:tggd=odin -vet-shadowing -vet-unused ${ODIN_FLAGS:-}
 cp odin/platform/web/page/index.html odin/platform/web/page/platform.js odin/platform/web/page/storage.js build/web/
+rm -rf build/web/sfx && cp -r odin/platform/web/page/sfx build/web/sfx
 cp "$(odin root)/core/sys/wasm/js/odin.js" build/web/
 echo "web build: build/web (serve with tools/serve.sh)"

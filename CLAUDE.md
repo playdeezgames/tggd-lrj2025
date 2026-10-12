@@ -29,7 +29,7 @@ PORT=8091 tools/serve.sh   # serve build/web; avoid 8765, often taken
 
 Layout: `odin/game` (package `game`, no platform imports, `core_init`/`core_step`, imported as `tggd:game` via `-collection:tggd=odin`), `odin/platform/web` (`#+build js`: exports + `page/` JS), `odin/tests` (`#+build !js`). Input is the original's 8 `Command`s; the page's key table is a copy of `Home.razor`'s `CommandTable` (case-sensitive and held keys repeat, as in the original; both are quirks to decide later).
 
-Milestone status: 1 (skeleton, smoke screen, build, tests) done. Next: fonts/palette assets, static room render, world generation, rules, UI states, saving, touch, ship.
+Milestone status: 1 (skeleton, smoke screen, build, tests) done. 2 (assets) partly done: palette, font-agnostic draw engine (`draw.odin`: `Font` struct, `write_text`, `write_centered`, clipping), 12 sfx (`sfx.odin`, `page/sfx/*.wav`, queue drained by the page each frame). **The text/sprite font data is NOT ported yet: the user says the original fonts (the `Cy*` text fonts in `Fonts.vb`, and possibly `BlueRoom`) have questionable provenance and must be replaced. Do not regenerate them from `Fonts.vb` or commit them; wait for the replacement to be chosen.** Next after that: static room render, world generation, rules, UI states, saving, touch, ship.
 
 ## Commands (original VB.NET build, `src/`)
 

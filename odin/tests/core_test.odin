@@ -80,3 +80,90 @@ rng_is_deterministic_and_in_range :: proc(t: ^testing.T) {
 		testing.expect_value(t, x, game.rng_range(&b, 3, 9))
 	}
 }
+
+// ---- drawing engine, with a tiny font made here (the real font data is not chosen yet) ---------------
+// A 3-wide, 2-high font holding 'A' (index 0) and 'B': A = top row full, bottom row left pixel; B = both rows right pixel.
+test_font_rows := [4]u16{0b111, 0b001, 0b100, 0b100}
+
+test_font :: proc() -> game.Font {
+	return {width = 3, height = 2, first = 'A', count = 2, rows = test_font_rows[:]}
+}
+
+@(test)
+text_draws_set_pixels_only_and_returns_the_advance :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	font := test_font()
+	game.fill_all(r.core, .Blue)
+	end := game.write_text(r.core, &font, 10, 20, .White, "AB")
+	testing.expect_value(t, end, 16)
+	hue :: proc(c: ^game.Core, x, y: int) -> game.Hue { return game.Hue(c.hues[x + y * game.FRAME_WIDTH]) }
+	testing.expect_value(t, hue(r.core, 10, 20), game.Hue.White) // A top row
+	testing.expect_value(t, hue(r.core, 12, 20), game.Hue.White)
+	testing.expect_value(t, hue(r.core, 10, 21), game.Hue.White) // A bottom-left
+	testing.expect_value(t, hue(r.core, 11, 21), game.Hue.Blue)  // untouched: background shows through
+	testing.expect_value(t, hue(r.core, 15, 20), game.Hue.White) // B right pixel, second glyph starts at 13
+	testing.expect_value(t, hue(r.core, 13, 20), game.Hue.Blue)
+}
+
+@(test)
+characters_outside_the_font_advance_but_draw_nothing :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	font := test_font()
+	game.fill_all(r.core, .Black)
+	end := game.write_text(r.core, &font, 0, 0, .White, "?A?")
+	testing.expect_value(t, end, 9)
+	testing.expect_value(t, game.text_width(&font, "?A?"), 9)
+	testing.expect_value(t, game.Hue(r.core.hues[0]), game.Hue.Black)
+	testing.expect_value(t, game.Hue(r.core.hues[3]), game.Hue.White) // 'A' at x = 3
+}
+
+@(test)
+drawing_clips_at_every_edge_without_wrapping :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	font := test_font()
+	game.fill_all(r.core, .Black)
+	game.write_text(r.core, &font, -2, 0, .White, "A") // columns -2, -1 clipped; column 0 of the top row is the glyph's third pixel
+	game.write_text(r.core, &font, 0, -1, .Yellow, "A") // top row clipped; the bottom row's left pixel lands at (0, 0)
+	game.write_text(r.core, &font, game.FRAME_WIDTH - 1, 63, .Red, "A") // off the right and bottom edges
+	testing.expect_value(t, game.Hue(r.core.hues[0]), game.Hue.Yellow)
+	testing.expect_value(t, game.Hue(r.core.hues[game.FRAME_WIDTH - 1]), game.Hue.Black) // nothing wrapped to the row's far end
+	testing.expect_value(t, game.Hue(r.core.hues[game.FRAME_WIDTH - 1 + 63 * game.FRAME_WIDTH]), game.Hue.Red)
+	testing.expect_value(t, game.Hue(r.core.hues[0 + 1 * game.FRAME_WIDTH]), game.Hue.Black)
+}
+
+@(test)
+centred_text_uses_the_integer_half_of_the_width :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	font := test_font()
+	game.fill_all(r.core, .Black)
+	game.write_centered(r.core, &font, 32, 0, .White, "A") // width 3, half 1 -> starts at 31
+	testing.expect_value(t, game.Hue(r.core.hues[31]), game.Hue.White)
+	testing.expect_value(t, game.Hue(r.core.hues[30]), game.Hue.Black)
+}
+
+// ---- sound queue -----------------------------------------------------------------------------------
+@(test)
+a_command_queues_its_sound_once_and_the_queue_clears :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	play(&r, .Green)
+	testing.expect_value(t, r.out.sfx_count, 1)
+	testing.expect_value(t, r.out.sfx[0], game.Sfx.Take)
+	game.core_step(r.core, {}, &r.out)
+	testing.expect_value(t, r.out.sfx_count, 0)
+}
+
+@(test)
+a_flood_of_sounds_is_capped_not_overrun :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	for _ in 0 ..< game.SFX_QUEUE_SIZE * 2 { game.play_sfx(r.core, .Eat) }
+	testing.expect_value(t, r.core.sfx_count, game.SFX_QUEUE_SIZE)
+}
+
+@(test)
+every_sound_has_a_wav_path :: proc(t: ^testing.T) {
+	files := game.SFX_FILES
+	for path, sfx in files {
+		testing.expectf(t, len(path) > 4 && path[len(path) - 4:] == ".wav", "%v has no .wav path", sfx)
+	}
+	testing.expect_value(t, len(files), 12)
+}

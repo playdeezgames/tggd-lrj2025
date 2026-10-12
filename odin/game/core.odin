@@ -15,6 +15,9 @@ Core :: struct {
 	// smoke test state
 	cursor_x, cursor_y: int,
 	last_command:       Command,
+
+	sfx_queue: [SFX_QUEUE_SIZE]Sfx, // played by the platform after the step, in order
+	sfx_count: int,
 }
 
 core_init :: proc(core: ^Core, services: Services) {
@@ -41,6 +44,9 @@ core_step :: proc(core: ^Core, input: Step_Input, out: ^Step_Output) {
 		out.frame_changed = false
 	}
 	out.frame = &core.frame
+	out.sfx = core.sfx_queue
+	out.sfx_count = core.sfx_count
+	core.sfx_count = 0
 }
 
 handle_command :: proc(core: ^Core, command: Command) {
@@ -51,21 +57,14 @@ handle_command :: proc(core: ^Core, command: Command) {
 	case .Right: core.cursor_x = min(core.cursor_x + 1, FRAME_WIDTH - 1)
 	case .None:  return
 	}
+	#partial switch command { // smoke test: each colour command plays a different sound
+	case .Green:  play_sfx(core, .Take)
+	case .Red:    play_sfx(core, .Yoink)
+	case .Blue:   play_sfx(core, .Eat)
+	case .Yellow: play_sfx(core, .Woo_Hoo)
+	}
 	core.last_command = command
 	core.dirty = true
-}
-
-set_pixel :: proc(core: ^Core, x, y: int, hue: Hue) {
-	if x < 0 || y < 0 || x >= FRAME_WIDTH || y >= FRAME_HEIGHT { return }
-	core.hues[x + y * FRAME_WIDTH] = u8(hue)
-}
-
-fill_rect :: proc(core: ^Core, x, y, w, h: int, hue: Hue) {
-	for row in y ..< y + h {
-		for column in x ..< x + w {
-			set_pixel(core, column, row, hue)
-		}
-	}
 }
 
 // Hue indices to RGBA, once per changed frame.

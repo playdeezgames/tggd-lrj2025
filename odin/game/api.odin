@@ -24,6 +24,8 @@ Input_Event :: struct {
 Step_Output :: struct {
 	frame:         ^[FRAME_WIDTH * FRAME_HEIGHT]u32, // bytes in memory order R,G,B,A (little-endian u32 0xAABBGGRR)
 	frame_changed: bool,
+	sfx:           [SFX_QUEUE_SIZE]Sfx, // sounds this step asked for, in order; the first sfx_count are valid
+	sfx_count:     int,
 }
 
 Step_Input :: struct {

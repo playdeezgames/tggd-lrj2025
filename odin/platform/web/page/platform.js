@@ -53,11 +53,27 @@
 	});
 	addEventListener("contextmenu", (e) => e.preventDefault());
 
+	// ---- sound: the core owns the file table; one Audio element per effect, restarted on each play (as the original) ----
+	const sounds = [];
+	for (let i = 0; i < exports.platform_sfx_file_count(); i++) {
+		const a = new Audio(mem.loadString(exports.platform_sfx_file_ptr(i), exports.platform_sfx_file_len(i)));
+		a.preload = "auto";
+		sounds.push(a);
+	}
+	function playSounds() {
+		for (let i = 0, n = exports.platform_sfx_count(); i < n; i++) {
+			const a = sounds[exports.platform_sfx_at(i)];
+			logInput("sfx", a.src);
+			try { a.currentTime = 0; a.play().catch(() => {}); } catch (e) {}
+		}
+	}
+
 	// ---- the frame loop ---------------------------------------------------------------------------------
 	let prev = performance.now();
 	function frame(now) {
 		if (laidOutFor !== innerWidth + "x" + innerHeight) layout(); // a pane that was hidden at load reports 0 by 0
 		exports.platform_frame(Math.min((now - prev) / 1000, 0.25), Date.now()); prev = now;
+		playSounds();
 		const ptr = exports.platform_frame_ptr();
 		if (ptr && exports.platform_frame_changed()) {
 			ctx.putImageData(new ImageData(new Uint8ClampedArray(mem.memory.buffer, ptr, FRAME_W * FRAME_H * 4), FRAME_W, FRAME_H), 0, 0);

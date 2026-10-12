@@ -49,3 +49,16 @@ main :: proc() {
 }
 @(export) platform_frame_ptr :: proc "c" () -> rawptr { return out.frame }
 @(export) platform_frame_changed :: proc "c" () -> bool { return out.frame_changed }
+
+// Sounds: the page asks for the file table once, then after every frame for the sounds that step queued.
+@(export) platform_sfx_file_count :: proc "c" () -> i32 { return i32(len(game.Sfx)) }
+@(export) platform_sfx_file_ptr :: proc "c" (sfx: i32) -> rawptr {
+	files := game.SFX_FILES
+	return raw_data(files[game.Sfx(sfx)])
+}
+@(export) platform_sfx_file_len :: proc "c" (sfx: i32) -> i32 {
+	files := game.SFX_FILES
+	return i32(len(files[game.Sfx(sfx)]))
+}
+@(export) platform_sfx_count :: proc "c" () -> i32 { return i32(out.sfx_count) }
+@(export) platform_sfx_at :: proc "c" (i: i32) -> i32 { return i32(out.sfx[i]) }
