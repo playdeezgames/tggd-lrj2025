@@ -37,6 +37,7 @@ can_spawn_character :: proc(world: ^World, t: Character_Type, id: int) -> bool {
 		return loc.location_type == .Starting_Room_Floor
 	case .Moon_Person:
 		if loc.character != NONE || is_solid(loc.location_type) { return false }
+		if loc.location_type == .Starting_Room_Floor { return false } // decided: no moon people where the player starts
 		// not on the four floor tiles just inside the door of each wall
 		c, r := int(loc.column), int(loc.row)
 		if c == 1 && r == HALF { return false }

@@ -75,7 +75,9 @@ enter :: proc(core: ^Core, screen: Screen) {
 // Neutral.DetermineState: pending messages first, then death, otherwise play.
 enter_neutral :: proc(core: ^Core) {
 	switch {
-	case has_messages(&core.world):               enter(core, .Message)
+	case has_messages(&core.world):
+		enter(core, .Message)
+		if m := &core.world.messages[0]; m.has_sfx { play_sfx(core, m.sfx) } // once, when the message appears
 	case is_dead(&core.world, core.world.avatar): enter(core, .Dead)
 	case:                                         enter(core, .Navigation)
 	}
@@ -173,11 +175,6 @@ handle_command :: proc(core: ^Core, command: Command) {
 			if core.menu_index == 1 { attempt_use_item_of_type(core, avatar, .Potion) }
 			enter_neutral(core)
 		}
-	}
-	// Refresh runs after every command: the message screen plays its sound each time it is refreshed, so a key that
-	// does nothing there replays it (a quirk of the original).
-	if core.screen == .Message && has_messages(&core.world) && core.world.messages[0].has_sfx {
-		play_sfx(core, core.world.messages[0].sfx)
 	}
 }
 

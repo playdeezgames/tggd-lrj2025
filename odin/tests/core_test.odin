@@ -818,7 +818,7 @@ potions_heal_up_to_the_maximum_and_say_so :: proc(t: ^testing.T) {
 	carry(c, .Potion)
 	game.attempt_use_item_of_type(c, a, .Potion)
 	testing.expect_value(t, stat(c, a, .Health), 100)
-	testing.expect_value(t, message_text(c, 1), "+50 health|you have|100/100")
+	testing.expect_value(t, message_text(c, 1), "+20 health|you have|100/100") // decided: the real gain
 	testing.expect_value(t, game.item_type_count(&c.world, .Character, a, .Potion), 0)
 }
 
@@ -1017,7 +1017,7 @@ the_potion_key_asks_first_and_complains_when_there_is_none :: proc(t: ^testing.T
 }
 
 @(test)
-only_the_confirm_key_dismisses_a_message_and_its_sound_replays_on_other_keys :: proc(t: ^testing.T) {
+only_the_confirm_key_dismisses_a_message_and_its_sound_plays_once :: proc(t: ^testing.T) {
 	r := rig_new(); defer rig_free(&r)
 	c := scene(&r)
 	c.screen = .Navigation
@@ -1027,7 +1027,7 @@ only_the_confirm_key_dismisses_a_message_and_its_sound_replays_on_other_keys :: 
 	testing.expect_value(t, r.out.sfx_count, 1) // the first message's sound, played on showing it
 	testing.expect_value(t, r.out.sfx[0], game.Sfx.Enemy_Hit)
 	testing.expect_value(t, press_all(&r, .Up), game.Screen.Message)
-	testing.expect_value(t, r.out.sfx_count, 1) // a quirk: it plays again
+	testing.expect_value(t, r.out.sfx_count, 0) // decided: it plays once, when the message appears
 	testing.expect_value(t, press_all(&r, .Red, .Left, .Blue), game.Screen.Message)
 	testing.expect_value(t, c.world.message_count, 2)
 	testing.expect_value(t, press_all(&r, .Green), game.Screen.Message) // the second message
@@ -1370,4 +1370,40 @@ embarking_over_a_save_replaces_it_and_a_full_storage_does_not_stop_play :: proc(
 	press_all(&r, .Right, .Right)
 	testing.expect(t, !store.has)
 	testing.expect(t, !r.core.has_save)
+}
+
+// ---- decided changes from the original (QUIRKS.md) ------------------------------------------------------
+@(test)
+no_moon_person_starts_in_the_starting_room :: proc(t: ^testing.T) {
+	in_ending := 0
+	for seed in 0 ..< u64(200) {
+		w := gen(seed); defer free(w)
+		for c in 0 ..< w.character_count {
+			if w.characters[c].character_type != .Moon_Person { continue }
+			m := int(w.locations[w.characters[c].location].map_id)
+			testing.expect(t, m != 0)
+			if m == 1 { in_ending += 1 }
+		}
+		// so nobody is next to the player at the start
+		avatar := int(w.characters[w.avatar].location)
+		for d in game.Direction {
+			n := game.location_neighbor(w, avatar, d)
+			testing.expect(t, n == game.NONE || w.locations[n].character == game.NONE)
+		}
+	}
+	testing.expect(t, in_ending > 0) // the ending room is still allowed (kept as in the original)
+}
+
+@(test)
+a_miss_is_two_short_lines :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	a := c.world.avatar
+	m := moon(c, 6, 5)
+	game.stat_set(&c.world.characters[m].stats, .Defend, 100)
+	game.attempt_move(c, a, .East)
+	testing.expect_value(t, message_text(c, 0), "N00b|misses!")
+	testing.expect_value(t, c.world.messages[0].sfx, game.Sfx.Player_Miss)
+	// and the counter-strike still lands for 20 - 5
+	testing.expect_value(t, message_text(c, 1), "Moonie|hits|for 15!|85 left!")
 }

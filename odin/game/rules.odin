@@ -258,10 +258,11 @@ use_item :: proc(core: ^Core, item, c: int) {
 			add_message(core, c, nil, "Hungry?", "Blueberries", "satisfy!")
 		}
 	case .Potion:
-		benefit := stat_get(&it.stats, .Health)
-		stat_change(&ch.stats, .Health, benefit)
+		before := stat_get(&ch.stats, .Health)
+		stat_change(&ch.stats, .Health, stat_get(&it.stats, .Health))
+		gained := stat_get(&ch.stats, .Health) - before // decided: the real gain, not the potion's nominal 50
 		add_message(core, c, nil,
-			fmt.tprintf("+%d health", benefit), "you have",
+			fmt.tprintf("+%d health", gained), "you have",
 			fmt.tprintf("%d/%d", stat_get(&ch.stats, .Health), stat_max(&ch.stats, .Health)))
 		remove_item(world, item)
 	}
@@ -312,9 +313,9 @@ interact :: proc(core: ^Core, agent, target: int, is_counter: bool) {
 		hit = true
 	} else {
 		sfx := miss_sfx[a.character_type]
-		line := fmt.tprintf("%s misses!", agent_name)
-		add_message(core, agent, sfx, line)
-		add_message(core, target, sfx, line)
+		// decided: two lines ("N00b" / "misses!"); one line was wider than the screen
+		add_message(core, agent, sfx, agent_name, "misses!")
+		add_message(core, target, sfx, agent_name, "misses!")
 	}
 	if hit {
 		on_hit_enemy(core, agent)
