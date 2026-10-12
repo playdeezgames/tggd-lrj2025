@@ -1,4 +1,3 @@
-rm -rf ./pub-html
-dotnet publish ./src/TGGDLRJ2025/TGGDLRJ2025.csproj -o ./pub-html -c Release 
-rm -f ./pub-html/*.pdb
-butler push pub-html/wwwroot thegrumpygamedev/tggd-lrj2025:html
+#!/bin/bash
+# Builds, tests and zips the Odin build; uploads to itch.io only with --push. See tools/ship.sh.
+exec "$(dirname "$0")/tools/ship.sh" "$@"

@@ -14,6 +14,7 @@ Screen :: enum u8 {
 	Confirm_Abandon,
 	Confirm_Potion,
 	Confirm_Embark, // only when a saved game would be replaced
+	Credits,
 }
 
 // ---- menus (PickerState) -------------------------------------------------------------------------------
@@ -25,8 +26,8 @@ Menu :: struct {
 	caption_hue: Hue,
 }
 
-MAIN_MENU_ITEMS := [?]string{"Tutorial", "Embark!"}
-MAIN_MENU_ITEMS_WITH_SAVE := [?]string{"Continue", "Tutorial", "Embark!"}
+MAIN_MENU_ITEMS := [?]string{"Tutorial", "Embark!", "Credits"}
+MAIN_MENU_ITEMS_WITH_SAVE := [?]string{"Continue", "Tutorial", "Embark!", "Credits"}
 GAME_MENU_ITEMS := [?]string{"Continue", "Abandon"}
 CONFIRM_ITEMS := [?]string{"No", "Yes"}
 
@@ -63,6 +64,14 @@ TUTORIAL_STEPS := [?]Tutorial_Step {
 	{{"<D>", "<Right", "Arrow>", "go right!"}, .Right},
 	{{"<Space>", "action!"}, .Green},
 	{{"<Back", "Space>", "cancel!"}, .Red},
+}
+
+// ---- credits: pages of short centred lines; the first line of a page is its heading ----------------------
+CREDITS_PAGES := [?][]string {
+	{"Game by", "TheGrumpy", "GameDev", "lowrezjam", "2025"},
+	{"Fonts", "m3x6, m5x7", "by Daniel", "Linssen"},
+	{"Sprites", "by VEXED", "Bit Bonanza", "Bountiful", "Bits"},
+	{"Sounds", "by", "TheGrumpy", "GameDev"},
 }
 
 // ---- transitions ---------------------------------------------------------------------------------------
@@ -105,6 +114,9 @@ handle_command :: proc(core: ^Core, command: Command) {
 			case "Tutorial":
 				enter(core, .Tutorial)
 				core.tutorial_step = 0
+			case "Credits":
+				enter(core, .Credits)
+				core.credits_page = 0
 			case "Embark!":
 				if core.has_save {
 					enter(core, .Confirm_Embark) // a saved game would be lost
@@ -155,6 +167,13 @@ handle_command :: proc(core: ^Core, command: Command) {
 		case .Green:
 			if core.menu_index == 1 { abandon(core) } else { enter(core, .Game_Menu) } // Yes / No
 		}
+	case .Credits:
+		#partial switch command {
+		case .Green:
+			core.credits_page += 1
+			if core.credits_page >= len(CREDITS_PAGES) { enter(core, .Main_Menu) }
+		case .Red: enter(core, .Main_Menu)
+		}
 	case .Confirm_Embark:
 		if menu_navigate(core, command) { break }
 		#partial switch command {
@@ -198,6 +217,7 @@ draw_screen :: proc(core: ^Core) {
 	case .Title:      draw_title(core)
 	case .Main_Menu, .Game_Menu, .Confirm_Abandon, .Confirm_Potion, .Confirm_Embark: draw_menu(core)
 	case .Tutorial:   draw_tutorial(core)
+	case .Credits:    draw_credits(core)
 	case .Navigation: draw_navigation(core)
 	case .Message:    draw_message(core)
 	case .Dead:       draw_dead(core)
@@ -271,4 +291,19 @@ draw_dead :: proc(core: ^Core) {
 	fill_all(core, .Black)
 	font := &FONTS[.Text]
 	write_centered(core, font, HALF_WIDTH, (FRAME_HEIGHT - font.height) / 2, .Red, "Yer Dead!")
+}
+
+draw_credits :: proc(core: ^Core) {
+	fill_all(core, .Black)
+	font, small := &FONTS[.Text], &FONTS[.Small]
+	lines := CREDITS_PAGES[core.credits_page]
+	y := (FRAME_HEIGHT - len(lines) * font.height) / 2
+	for line, i in lines {
+		write_centered(core, font, HALF_WIDTH, y, .Yellow if i == 0 else .Light_Gray, line)
+		y += font.height
+	}
+	// "2/4" at the bottom, so the player knows how many pages are left
+	buffer: [8]u8
+	page := format_count(buffer[:], core.credits_page + 1)
+	write_centered(core, small, HALF_WIDTH, FRAME_HEIGHT - small.height, .Dark_Gray, page)
 }

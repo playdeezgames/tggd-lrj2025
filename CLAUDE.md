@@ -29,7 +29,7 @@ PORT=8091 tools/serve.sh   # serve build/web; avoid 8765, often taken
 
 Layout: `odin/game` (package `game`, no platform imports, `core_init`/`core_step`, imported as `tggd:game` via `-collection:tggd=odin`), `odin/platform/web` (`#+build js`: exports + `page/` JS), `odin/tests` (`#+build !js`). Input is the original's 8 `Command`s; the page's key table is a copy of `Home.razor`'s `CommandTable` (case-sensitive and held keys repeat, as in the original; both are quirks to decide later).
 
-Milestone status: 1 (skeleton), 2 (assets), 3 (static render), 4 (world generation), 5 (rules) and 6 (UI states: the game is playable) and 7 (saving) and 8 (touch controls, input polish) done. Next: credits screen, itch page text and ship (9). `TODO.md` lists the asset attribution still owed; `QUIRKS.md` lists the original's oddities the port preserves, to be decided with the owner one at a time.
+Milestone status: 1 (skeleton), 2 (assets), 3 (static render), 4 (world generation), 5 (rules) and 6 (UI states: the game is playable) and 7 (saving) and 8 (touch controls, input polish) and 9 (credits screen, itch page text, ship script) done. What remains is shipping: `tools/ship.sh --push`, only when the owner says (see `TODO.md`). `TODO.md` lists the asset attribution still owed; `QUIRKS.md` lists the original's oddities the port preserves, to be decided with the owner one at a time.
 
 Generation (`worldgen.odin`): `generate_world(world, rng)` builds maps, the maze (main path 1..15 through unused doors, then side paths), 40 moon people, then items by `ITEM_COUNT`. It has its own splitmix64 RNG, so a seed reproduces a world (`?seed=N` on the page); it cannot match the original's unseeded `System.Random`.
 
@@ -44,7 +44,7 @@ There are no tests and no linter. The solution is `src/src.sln` (net9.0).
 ```bash
 dotnet build src/src.sln                              # VB projects build with TreatWarningsAsErrors + OptionStrict On
 dotnet run --project src/TGGDLRJ2025                  # Blazor dev server at http://localhost:5029
-bash shippit.sh                                       # publish to ./pub-html and butler push to thegrumpygamedev/tggd-lrj2025:html
+# (the old shippit.sh published the Blazor build; it now wraps tools/ship.sh, which ships the Odin build)
 ```
 
 `shippit.sh` publishes to a public itch.io page and is not executable (run with `bash`). Only run it when the user says to. It pushes `pub-html/wwwroot`, so the channel is `html`.

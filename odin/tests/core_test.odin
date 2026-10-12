@@ -3,6 +3,7 @@ package tests
 
 import "base:runtime"
 import "core:fmt"
+import "core:strings"
 import "core:testing"
 import "tggd:game"
 
@@ -917,10 +918,10 @@ menus_wrap_around_at_both_ends :: proc(t: ^testing.T) {
 	press_all(&r, .Green)
 	testing.expect_value(t, r.core.menu_index, 0)
 	press_all(&r, .Up)
-	testing.expect_value(t, r.core.menu_index, 1)
+	testing.expect_value(t, r.core.menu_index, 2) // Tutorial, Embark!, Credits
 	press_all(&r, .Down)
 	testing.expect_value(t, r.core.menu_index, 0)
-	press_all(&r, .Down, .Down)
+	press_all(&r, .Down, .Down, .Down)
 	testing.expect_value(t, r.core.menu_index, 0)
 }
 
@@ -1064,7 +1065,8 @@ every_screen_draws_something_and_text_that_fit_the_original_still_fits :: proc(t
 	// "TheGrumpyGameDev" is 4 pixels too wide and is squeezed (write_centered_fitted)
 	testing.expect_value(t, game.text_width(small, "TheGrumpyGameDev"), 68)
 	for step in game.TUTORIAL_STEPS { for line in step.text { check(t, text, line, 64) } }
-	for item in ([?]string{"Tutorial", "Embark!", "Continue", "Abandon", "No", "Yes", "Abandon?", "Yer Dead!", "Lose save?"}) { check(t, text, item, 64) }
+	for item in ([?]string{"Tutorial", "Embark!", "Continue", "Abandon", "No", "Yes", "Abandon?", "Yer Dead!", "Lose save?", "Credits"}) { check(t, text, item, 64) }
+	for page in game.CREDITS_PAGES { for line in page { check(t, text, line, 64) } }
 	check(t, small, "Use Potion?", 64)
 	for line in ([?]string{"You got", "a sword!", "a shield!", "Good to", "have a", "back-up!", "Yer sword", "broke!", "Equipping",
 		"next one!", "(10 left)", "Yer last", "Yer shield", "Save keys", "to open", "doors", "Blueberry", "(fer when", "yer",
@@ -1247,7 +1249,7 @@ continue_appears_only_with_a_valid_save_and_resumes_the_same_world :: proc(t: ^t
 	testing.expect(t, again.core.has_save)
 	press_all(&again, .Green) // title -> main menu
 	menu := game.menu_of(again.core, .Main_Menu)
-	testing.expect_value(t, len(menu.items), 3)
+	testing.expect_value(t, len(menu.items), 4)
 	testing.expect_value(t, menu.items[0], "Continue")
 	testing.expect_value(t, press_all(&again, .Green), game.Screen.Navigation)
 	testing.expect(t, again.core.world == reference)
@@ -1314,7 +1316,7 @@ a_damaged_save_is_ignored_whole_and_left_alone :: proc(t: ^testing.T) {
 	testing.expect_value(t, r.core.world.avatar, game.NONE)
 	testing.expect(t, store.has) // not deleted
 	press_all(&r, .Green)
-	testing.expect_value(t, len(game.menu_of(r.core, .Main_Menu).items), 2)
+	testing.expect_value(t, len(game.menu_of(r.core, .Main_Menu).items), 3) // no Continue
 }
 
 @(test)
@@ -1406,4 +1408,26 @@ a_miss_is_two_short_lines :: proc(t: ^testing.T) {
 	testing.expect_value(t, c.world.messages[0].sfx, game.Sfx.Player_Miss)
 	// and the counter-strike still lands for 20 - 5
 	testing.expect_value(t, message_text(c, 1), "Moonie|hits|for 15!|85 left!")
+}
+
+@(test)
+the_credits_are_reachable_page_through_and_return :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	press_all(&r, .Green, .Up, .Green) // Up from the first item wraps to Credits
+	testing.expect_value(t, r.core.screen, game.Screen.Credits)
+	testing.expect_value(t, r.core.credits_page, 0)
+	press_all(&r, .Up, .Left, .Blue) // other keys do nothing
+	testing.expect_value(t, r.core.credits_page, 0)
+	for _ in 0 ..< len(game.CREDITS_PAGES) - 1 { press_all(&r, .Green) }
+	testing.expect_value(t, r.core.screen, game.Screen.Credits)
+	testing.expect_value(t, r.core.credits_page, len(game.CREDITS_PAGES) - 1)
+	testing.expect_value(t, press_all(&r, .Green), game.Screen.Main_Menu)
+	press_all(&r, .Up, .Green, .Red) // Red leaves at any time
+	testing.expect_value(t, r.core.screen, game.Screen.Main_Menu)
+	// each page names its credit
+	all := ""
+	for page in game.CREDITS_PAGES { for line in page { all = fmt.tprintf("%s %s", all, line) } }
+	for want in ([?]string{"Linssen", "VEXED", "Bit Bonanza", "Bountiful", "m3x6", "m5x7"}) {
+		testing.expectf(t, strings.contains(all, want), "credits do not mention %s", want)
+	}
 }

@@ -5,8 +5,15 @@
 The Odin port uses third-party assets that require or request credit. Show it **in the game** (a credits/About screen
 reachable from the title or main menu, or a line on the title screen) **and on the itch.io page** (`ITCH_DESCRIPTION.md`).
 
-- [ ] **m3x6 and m5x7 fonts**, by Daniel Linssen (managore): https://managore.itch.io/m3x6, https://managore.itch.io/m5x7. m3x6 is free to use *with attribution* (confirmed by the project owner); m5x7 is CC0, attribution appreciated.
-- [ ] **Bit Bonanza 5.0 and Bountiful Bits 3.1**, by VEXED (v3x3d), CC0 (credit appreciated, not required): https://v3x3d.itch.io/. Sprites used: player, moon person, sword, shield, key, potion, food, door, sign, wall.
-- [ ] Sound effects (`odin/platform/web/page/sfx/*.wav`): **provenance is not recorded in this repo.** Find out where they came from (the original VB build shipped them in `src/TGGDLRJ2025/wwwroot/sfx/`) and credit or replace them like the fonts.
-- [ ] Add the credits to `ITCH_DESCRIPTION.md` (not written yet) and keep `odin/assets/README.md` in step with whatever the game shows.
+- [x] (credits screen, ITCH_DESCRIPTION.md) **m3x6 and m5x7 fonts**, by Daniel Linssen (managore): https://managore.itch.io/m3x6, https://managore.itch.io/m5x7. m3x6 is free to use *with attribution* (confirmed by the project owner); m5x7 is CC0, attribution appreciated.
+- [x] (credits screen, ITCH_DESCRIPTION.md) **Bit Bonanza 5.0 and Bountiful Bits 3.1**, by VEXED (v3x3d), CC0 (credit appreciated, not required): https://v3x3d.itch.io/. Sprites used: player, moon person, sword, shield, key, potion, food, door, sign, wall.
+- [x] Sound effects (`odin/platform/web/page/sfx/*.wav`): made by the project owner (confirmed October 12, 2026); credited as such.
+- [x] Credits are in the game (main menu, Credits) and in `ITCH_DESCRIPTION.md`. Keep `odin/assets/README.md` and `odin/game/ui.odin`'s `CREDITS_PAGES` in step if an asset changes.
 - [ ] Check the repo's own `LICENSE` and the vendored sheets' README files are still correct for what is redistributed.
+
+## Shipping
+
+- [ ] Push the build when the owner says: `tools/ship.sh --push` (replaces the Blazor build on the `html` channel). Not done yet.
+- [ ] After the push: paste `ITCH_DESCRIPTION.md`, set the embed square, check the live page.
+- [ ] Hear the sound effects in a visible tab, and try the touch controls on a real phone (neither was possible in the development pane).
+- [ ] Decide when to delete `src/` (the VB.NET reference), `Bit-Bonanza-*`/`Bountiful-Bits-*` stay (the generator reads them).

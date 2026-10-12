@@ -12,6 +12,7 @@ Core :: struct {
 	screen:   Screen,
 	menu_index:    int, // the highlighted item of a menu screen
 	tutorial_step: int,
+	credits_page:  int,
 
 	has_save:  bool, // a valid save is in storage: the main menu offers Continue
 	save_buf:  [SAVE_BUFFER_SIZE]u8,
