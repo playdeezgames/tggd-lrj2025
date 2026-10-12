@@ -47,7 +47,7 @@ dotnet run --project src/TGGDLRJ2025                  # Blazor dev server at htt
 # (the old shippit.sh published the Blazor build; it now wraps tools/ship.sh, which ships the Odin build)
 ```
 
-`shippit.sh` publishes to a public itch.io page and is not executable (run with `bash`). Only run it when the user says to. It pushes `pub-html/wwwroot`, so the channel is `html`.
+`shippit.sh` and `tools/ship.sh` publish to a public itch.io page (`thegrumpygamedev/tggd-lrj2025:html`) only with `--push`; without it they test, build and zip. Never push unless the user says to. (The original's `shippit.sh` published the Blazor build via `dotnet publish`; it is in git history.)
 
 `src/FontMaker` is a one-off console tool: it reads `source.png` (10x10 cells with 1px gutters, black = off) and writes glyph JSON for `TGGD.UI.FontData`.
 
