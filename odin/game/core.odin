@@ -21,7 +21,7 @@ core_init :: proc(core: ^Core, services: Services) {
 	seed: u64 = 0x5EED
 	if services.entropy != nil { seed = services.entropy() }
 	rng_seed(&core.rng, seed)
-	debug_show_room(core, .Starting_Room, 7, 7)
+	new_game(core)
 }
 
 core_step :: proc(core: ^Core, input: Step_Input, out: ^Step_Output) {
@@ -46,6 +46,18 @@ handle_command :: proc(core: ^Core, command: Command) {
 	// milestone 3 draws a fixed picture; commands arrive with the rules
 	_ = core
 	_ = command
+}
+
+// Generates a fresh world (the Embark menu item). Retries with the generator moved on in the one case the original would
+// crash; gives up with an assertion after many tries, which would mean a bug.
+new_game :: proc(core: ^Core) {
+	for _ in 0 ..< 100 {
+		if generate_world(&core.world, &core.rng) {
+			core.dirty = true
+			return
+		}
+	}
+	panic("world generation failed 100 times")
 }
 
 // Hue indices to RGBA, once per changed frame.

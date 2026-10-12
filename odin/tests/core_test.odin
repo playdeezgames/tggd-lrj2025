@@ -345,3 +345,192 @@ statistics_clamp_to_their_bounds_like_the_original :: proc(t: ^testing.T) {
 	testing.expect_value(t, game.stat_get(&s, .Attack), 0)
 	testing.expect_value(t, game.stat_max(&s, .Attack), int(max(i32)))
 }
+
+// ---- world generation ---------------------------------------------------------------------------------
+gen :: proc(seed: u64) -> ^game.World {
+	w := new(game.World)
+	rng: game.Rng
+	game.rng_seed(&rng, seed)
+	ok := game.generate_world(w, &rng)
+	if !ok { free(w); return nil }
+	return w
+}
+
+count_items :: proc(w: ^game.World, t: game.Item_Type) -> int {
+	n := 0
+	for i in 0 ..< w.item_count { if w.items[i].item_type == t { n += 1 } }
+	return n
+}
+
+@(test)
+a_generated_world_has_the_original_counts :: proc(t: ^testing.T) {
+	w := gen(1); defer free(w)
+	testing.expect(t, w != nil)
+	if w == nil { return }
+	testing.expect_value(t, w.map_count, 16)
+	types: [game.Map_Type]int
+	for i in 0 ..< w.map_count { types[w.map_types[i]] += 1 }
+	testing.expect_value(t, types[.Starting_Room], 1)
+	testing.expect_value(t, types[.Ending_Room], 1)
+	testing.expect_value(t, types[.Room], 14)
+	testing.expect_value(t, w.character_count, 41) // the player and 40 moon people
+	testing.expect_value(t, w.item_count, 102)
+	for key in game.Item_Type.Silver_Key ..= game.Item_Type.Emerald_Key { testing.expect_value(t, count_items(w, key), 1) }
+	testing.expect_value(t, count_items(w, .Food), 50)
+	testing.expect_value(t, count_items(w, .Sword), 10)
+	testing.expect_value(t, count_items(w, .Shield), 10)
+	testing.expect_value(t, count_items(w, .Potion), 25)
+	// map order: starting room, ending room, then rooms
+	testing.expect_value(t, w.map_types[0], game.Map_Type.Starting_Room)
+	testing.expect_value(t, w.map_types[1], game.Map_Type.Ending_Room)
+}
+
+@(test)
+the_avatar_starts_on_a_starting_room_floor :: proc(t: ^testing.T) {
+	for seed in 0 ..< u64(50) {
+		w := gen(seed); defer free(w)
+		avatar := w.characters[w.avatar]
+		loc := w.locations[avatar.location]
+		testing.expect_value(t, loc.location_type, game.Location_Type.Starting_Room_Floor)
+		testing.expect_value(t, int(loc.character), w.avatar)
+		testing.expect_value(t, avatar.character_type, game.Character_Type.N00b)
+	}
+}
+
+@(test)
+every_door_leads_to_a_floor_tile_and_the_way_back_returns_beside_it :: proc(t: ^testing.T) {
+	for seed in 0 ..< u64(100) {
+		w := gen(seed); defer free(w)
+		dirs := [game.Direction][2]int{.North = {7, 0}, .East = {14, 7}, .South = {7, 14}, .West = {0, 7}}
+		inside := [game.Direction][2]int{.North = {7, 13}, .East = {1, 7}, .South = {7, 1}, .West = {13, 7}}
+		opposite := game.DIRECTION_OPPOSITE
+		for map_id in 0 ..< w.map_count {
+			for d in game.Direction {
+				door := w.locations[game.location_id(map_id, dirs[d].x, dirs[d].y)]
+				dest := int(door.destination)
+				ok := dest != game.NONE
+				testing.expectf(t, ok, "seed %d map %d: %v door has no destination", seed, map_id, d)
+				if !ok { continue }
+				testing.expect(t, !game.is_solid(w.locations[dest].location_type))
+				// it arrives just inside the far wall of the direction travelled
+				to := w.locations[dest]
+				testing.expect_value(t, [2]int{int(to.column), int(to.row)}, inside[d])
+				// and that room's opposite door leads back to the tile just inside this door
+				back_door := w.locations[game.location_id(int(to.map_id), dirs[opposite[d]].x, dirs[opposite[d]].y)]
+				back := w.locations[int(back_door.destination)]
+				testing.expect_value(t, int(back.map_id), map_id)
+				testing.expect_value(t, [2]int{int(back.column), int(back.row)}, inside[opposite[d]])
+			}
+		}
+	}
+}
+
+@(test)
+the_main_path_numbers_the_rooms_and_reaches_the_ending_room :: proc(t: ^testing.T) {
+	for seed in 0 ..< u64(100) {
+		w := gen(seed); defer free(w)
+		// walk the numbered signs: room N's door to room N+1 exists, and sign numbers 1..15 each appear once
+		seen: [16]int
+		for map_id in 0 ..< w.map_count {
+			n := int(w.locations[game.location_id(map_id, 7, 7)].room_number)
+			if n != 0 { seen[n] += 1 }
+		}
+		for n in 1 ..= 15 { testing.expect_value(t, seen[n], 1) }
+		testing.expect_value(t, seen[0], 0)
+		// the ending room is unnumbered, the starting room is number 1
+		testing.expect_value(t, int(w.locations[game.location_id(1, 7, 7)].room_number), 0)
+		testing.expect_value(t, int(w.locations[game.location_id(0, 7, 7)].room_number), 1)
+		// everything is reachable from the starting room through doors
+		reached: [game.MAX_MAPS]bool
+		stack: [game.MAX_MAPS]int
+		sp := 1
+		reached[0] = true
+		dirs := [?][2]int{{7, 0}, {14, 7}, {7, 14}, {0, 7}}
+		for sp > 0 {
+			sp -= 1
+			m := stack[sp]
+			for d in dirs {
+				dest := int(w.locations[game.location_id(m, d.x, d.y)].destination)
+				next := int(w.locations[dest].map_id)
+				if !reached[next] { reached[next] = true; stack[sp] = next; sp += 1 }
+			}
+		}
+		for m in 0 ..< w.map_count { testing.expectf(t, reached[m], "seed %d: map %d unreachable", seed, m) }
+	}
+}
+
+@(test)
+keys_start_under_moon_people_on_room_floors :: proc(t: ^testing.T) {
+	for seed in 0 ..< u64(100) {
+		w := gen(seed); defer free(w)
+		for i in 0 ..< w.item_count {
+			item := w.items[i]
+			testing.expect_value(t, item.holder, game.Holder_Kind.Location)
+			loc := w.locations[item.holder_id]
+			testing.expect(t, !game.is_solid(loc.location_type))
+			if game.is_key(item.item_type) {
+				testing.expect_value(t, loc.location_type, game.Location_Type.Room_Floor)
+				testing.expect(t, loc.character != game.NONE && int(loc.character) != w.avatar)
+				testing.expect_value(t, w.characters[loc.character].character_type, game.Character_Type.Moon_Person)
+			}
+			// nothing starts on the player's tile
+			testing.expect(t, int(item.holder_id) != int(w.characters[w.avatar].location))
+		}
+	}
+}
+
+@(test)
+moon_people_avoid_the_tiles_inside_the_doors_and_each_other :: proc(t: ^testing.T) {
+	for seed in 0 ..< u64(100) {
+		w := gen(seed); defer free(w)
+		for c in 0 ..< w.character_count {
+			ch := w.characters[c]
+			loc := w.locations[ch.location]
+			testing.expect_value(t, int(loc.character), c) // one character per tile, and the tile knows it
+			if ch.character_type != .Moon_Person { continue }
+			col, row := int(loc.column), int(loc.row)
+			testing.expect(t, !(col == 1 && row == 7) && !(col == 13 && row == 7) && !(col == 7 && row == 1) && !(col == 7 && row == 13))
+			testing.expect(t, !game.is_solid(loc.location_type))
+			testing.expect_value(t, ch.stats[.Health].value, 25)
+		}
+	}
+}
+
+@(test)
+generation_is_deterministic_for_a_seed_and_differs_between_seeds :: proc(t: ^testing.T) {
+	a, b, c := gen(77), gen(77), gen(78)
+	defer { free(a); free(b); free(c) }
+	testing.expect(t, a^ == b^)
+	testing.expect(t, a^ != c^)
+}
+
+@(test)
+items_carry_the_original_statistics :: proc(t: ^testing.T) {
+	w := gen(3); defer free(w)
+	seen: [game.Item_Type]bool
+	for i in 0 ..< w.item_count {
+		item := &w.items[i]
+		seen[item.item_type] = true
+		#partial switch item.item_type {
+		case .Sword:
+			testing.expect_value(t, game.stat_get(&item.stats, .Attack), 20)
+			testing.expect_value(t, game.stat_get(&item.stats, .Sword_Durability), 5)
+		case .Shield:
+			testing.expect_value(t, game.stat_get(&item.stats, .Defend), 10)
+			testing.expect_value(t, game.stat_get(&item.stats, .Shield_Durability), 5)
+		case .Potion:
+			testing.expect_value(t, game.stat_get(&item.stats, .Health), 50)
+		}
+	}
+	for t2 in game.Item_Type { testing.expectf(t, seen[t2], "%v never generated", t2) }
+}
+
+@(test)
+many_seeds_generate_without_giving_up :: proc(t: ^testing.T) {
+	failures := 0
+	for seed in 0 ..< u64(300) {
+		w := gen(seed * 7919 + 13)
+		if w == nil { failures += 1 } else { free(w) }
+	}
+	testing.expect_value(t, failures, 0)
+}

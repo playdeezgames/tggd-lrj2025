@@ -29,7 +29,9 @@ PORT=8091 tools/serve.sh   # serve build/web; avoid 8765, often taken
 
 Layout: `odin/game` (package `game`, no platform imports, `core_init`/`core_step`, imported as `tggd:game` via `-collection:tggd=odin`), `odin/platform/web` (`#+build js`: exports + `page/` JS), `odin/tests` (`#+build !js`). Input is the original's 8 `Command`s; the page's key table is a copy of `Home.razor`'s `CommandTable` (case-sensitive and held keys repeat, as in the original; both are quirks to decide later).
 
-Milestone status: 1 (skeleton), 2 (assets) and 3 (static render) done. Next: world generation (4), rules (5), UI states (6), saving, touch, ship. `TODO.md` lists the asset attribution still owed.
+Milestone status: 1 (skeleton), 2 (assets), 3 (static render) and 4 (world generation) done. Next: rules (5), UI states (6), saving, touch, ship. `TODO.md` lists the asset attribution still owed; `QUIRKS.md` lists the original's oddities the port preserves, to be decided with the owner one at a time.
+
+Generation (`worldgen.odin`): `generate_world(world, rng)` builds maps, the maze (main path 1..15 through unused doors, then side paths), 40 moon people, then items by `ITEM_COUNT`. It has its own splitmix64 RNG, so a seed reproduces a world (`?seed=N` on the page); it cannot match the original's unseeded `System.Random`.
 
 World model (`types.odin`, `world.odin`): one flat `World` of fixed arrays (maps, locations, characters, items) with integer ids and `NONE = -1`; no pointers, so saving is plain data. All maps are 15x15, so location id = `map*225 + column + row*15`, matching the original's ids. Map creation order is the original's (starting room = map 0, ending room = 1, then the 14 rooms). Items belong to a `holder` (location or character) rather than sets; scanning in id order stands in for the original's `HashSet(Of Integer)` insertion order. Statistics are `Stat_Slot`s (value + optional min/max, read back clamped, as `Entity.GetStatistic`). `navigation.odin` is `NavigationState.Refresh` (camera centred on the avatar, sprite size 10, HUD bars). `debug_show_room` / the page's `?room=0|1|2&x=&y=` show a demo room for QA.
 
