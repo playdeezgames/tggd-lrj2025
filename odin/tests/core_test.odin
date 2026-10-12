@@ -45,31 +45,6 @@ first_step_presents_a_frame_and_an_idle_step_does_not :: proc(t: ^testing.T) {
 }
 
 @(test)
-direction_commands_move_the_cursor_and_clamp_at_the_edges :: proc(t: ^testing.T) {
-	r := rig_new(); defer rig_free(&r)
-	x, y := r.core.cursor_x, r.core.cursor_y
-	play(&r, .Right, .Down)
-	testing.expect_value(t, r.core.cursor_x, x + 1)
-	testing.expect_value(t, r.core.cursor_y, y + 1)
-	for _ in 0 ..< 100 { play(&r, .Left, .Up) }
-	testing.expect_value(t, r.core.cursor_x, 0)
-	testing.expect_value(t, r.core.cursor_y, 0)
-}
-
-@(test)
-a_changed_frame_is_rgba_of_the_drawn_hues :: proc(t: ^testing.T) {
-	r := rig_new(); defer rig_free(&r)
-	play(&r, .Green)
-	testing.expect(t, r.out.frame_changed)
-	palette := game.PALETTE
-	// the green bar sits at (2..62, 59..61); the cursor is elsewhere
-	testing.expect_value(t, r.out.frame[10 + 60 * game.FRAME_WIDTH], palette[game.Hue.Green])
-	// the cursor is white
-	c := r.core
-	testing.expect_value(t, r.out.frame[c.cursor_x + c.cursor_y * game.FRAME_WIDTH], palette[game.Hue.White])
-}
-
-@(test)
 rng_is_deterministic_and_in_range :: proc(t: ^testing.T) {
 	a, b: game.Rng
 	game.rng_seed(&a, 42)
@@ -144,16 +119,6 @@ centred_text_uses_the_integer_half_of_the_width :: proc(t: ^testing.T) {
 
 // ---- sound queue -----------------------------------------------------------------------------------
 @(test)
-a_command_queues_its_sound_once_and_the_queue_clears :: proc(t: ^testing.T) {
-	r := rig_new(); defer rig_free(&r)
-	play(&r, .Green)
-	testing.expect_value(t, r.out.sfx_count, 1)
-	testing.expect_value(t, r.out.sfx[0], game.Sfx.Take)
-	game.core_step(r.core, {}, &r.out)
-	testing.expect_value(t, r.out.sfx_count, 0)
-}
-
-@(test)
 a_flood_of_sounds_is_capped_not_overrun :: proc(t: ^testing.T) {
 	r := rig_new(); defer rig_free(&r)
 	for _ in 0 ..< game.SFX_QUEUE_SIZE * 2 { game.play_sfx(r.core, .Eat) }
@@ -203,4 +168,180 @@ sprites_are_ten_wide_and_the_blank_is_empty :: proc(t: ^testing.T) {
 		testing.expectf(t, ink != 0, "%v is blank", sprite)
 		testing.expectf(t, ink < 1 << 10, "%v spills past column 9", sprite)
 	}
+}
+
+@(test)
+a_queued_sound_comes_out_once_and_the_queue_clears :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	game.play_sfx(r.core, .Take)
+	game.core_step(r.core, {}, &r.out)
+	testing.expect_value(t, r.out.sfx_count, 1)
+	testing.expect_value(t, r.out.sfx[0], game.Sfx.Take)
+	game.core_step(r.core, {}, &r.out)
+	testing.expect_value(t, r.out.sfx_count, 0)
+}
+
+// ---- the navigation picture ---------------------------------------------------------------------------
+hue_at :: proc(c: ^game.Core, x, y: int) -> game.Hue { return game.Hue(c.hues[x + y * game.FRAME_WIDTH]) }
+
+// Every set pixel of a sprite drawn at (x, y) must show `hue` (it is drawn last at that place).
+expect_sprite_at :: proc(t: ^testing.T, c: ^game.Core, sprite: game.Sprite, x, y: int, hue: game.Hue, what: string) {
+	fonts := game.FONTS
+	sprites := &fonts[.Sprites]
+	seen := 0
+	for row in 0 ..< 10 {
+		bits := sprites.rows[int(sprite) * 10 + row]
+		for column in 0 ..< 10 {
+			if bits & (1 << uint(column)) != 0 {
+				seen += 1
+				got := hue_at(c, x + column, y + row)
+				if got != hue {
+					testing.expectf(t, false, "%s: pixel (%d,%d) is %v, want %v", what, x + column, y + row, got, hue)
+					return
+				}
+			}
+		}
+	}
+	testing.expectf(t, seen > 0, "%s: the sprite has no pixels", what)
+}
+
+show :: proc(r: ^Rig, map_type: game.Map_Type, column, row: int) {
+	game.debug_show_room(r.core, map_type, column, row)
+	game.core_step(r.core, {}, &r.out)
+}
+
+@(test)
+the_avatar_is_drawn_in_the_middle_of_the_view :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	show(&r, .Room, 7, 5)
+	expect_sprite_at(t, r.core, .Player, 27, 27, .Brown, "avatar") // (64 - 10) / 2
+	testing.expect(t, r.out.frame_changed)
+}
+
+@(test)
+neighbours_are_ten_pixels_apart_and_layers_stack_floor_item_character :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	show(&r, .Room, 7, 5)
+	// the debug room puts food east, a sword west, a shield south, a potion north, a moon person two east
+	// (the food east of the avatar sits next to the moon person, so the threat marker is drawn over it: see below)
+	expect_sprite_at(t, r.core, .Sword, 17, 27, .Light_Blue, "sword west")
+	expect_sprite_at(t, r.core, .Shield, 27, 37, .Light_Green, "shield south")
+	expect_sprite_at(t, r.core, .Potion, 27, 17, .Red, "potion north")
+	expect_sprite_at(t, r.core, .Moon_Person, 47, 27, .Dark_Gray, "moon person")
+	// a bare floor tile two up shows the floor sprite in its hue
+	expect_sprite_at(t, r.core, .Floor, 27, 7, .Darker_Gray, "floor")
+}
+
+@(test)
+tiles_next_to_another_character_show_the_threat_marker :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	show(&r, .Room, 7, 5)
+	// the moon person at column 9 threatens its non-solid neighbours: column 8 (holding the food), 10 and rows above and below
+	// the food tile is drawn first, then the marker over it
+	expect_sprite_at(t, r.core, .Threat, 37, 27, .Dark_Red, "threat on the food tile")
+	food_only := 0 // food pixels the marker does not cover keep the food's colour
+	fonts := game.FONTS
+	sprites := &fonts[.Sprites]
+	for row in 0 ..< 10 { for column in 0 ..< 10 {
+		food := sprites.rows[int(game.Sprite.Food) * 10 + row] & (1 << uint(column)) != 0
+		threat := sprites.rows[int(game.Sprite.Threat) * 10 + row] & (1 << uint(column)) != 0
+		if food && !threat {
+			food_only += 1
+			testing.expect_value(t, hue_at(r.core, 37 + column, 27 + row), game.Hue.Dark_Blue)
+		}
+	} }
+	testing.expect(t, food_only > 0)
+	// the tile west of the avatar has only the avatar next to it, which does not count: no marker there
+	dark_red := 0
+	for y in 27 ..< 37 { for x in 17 ..< 27 { if hue_at(r.core, x, y) == .Dark_Red { dark_red += 1 } } }
+	testing.expect_value(t, dark_red, 0)
+}
+
+@(test)
+the_room_edge_is_drawn_and_beyond_it_is_black :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	show(&r, .Starting_Room, 1, 1)
+	// the top-left corner of the room is two tiles up and left: a gray wall; one further is off the map
+	expect_sprite_at(t, r.core, .Wall, 17, 17, .Dark_Gray, "corner wall")
+	for y in 8 ..< 18 { testing.expect_value(t, hue_at(r.core, 8, y), game.Hue.Black) }
+	// the ending room's walls are blue
+	show(&r, .Ending_Room, 1, 1)
+	expect_sprite_at(t, r.core, .Wall, 17, 17, .Blue, "ending room wall")
+}
+
+@(test)
+the_status_bars_show_health_satiety_and_the_pack :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	show(&r, .Room, 7, 5)
+	// bars
+	testing.expect_value(t, hue_at(r.core, 40, 0), game.Hue.Darker_Gray)
+	testing.expect_value(t, hue_at(r.core, 40, 5), game.Hue.Darker_Gray)
+	testing.expect_value(t, hue_at(r.core, 60, 60), game.Hue.Darker_Gray)
+	// "H087 " in red from the left edge, then "S042 " in magenta
+	reds, magentas := 0, 0
+	for y in 0 ..< 6 {
+		for x in 0 ..< 21 { if hue_at(r.core, x, y) == .Red { reds += 1 } }
+		for x in 21 ..< 42 { if hue_at(r.core, x, y) == .Magenta { magentas += 1 } }
+	}
+	testing.expect(t, reds > 10)
+	testing.expect(t, magentas > 10)
+	// the pack along the bottom: food, potion, sword, shield, each ten wide, from x = 0 at y = 54
+	food_pixels := 0
+	for y in 54 ..< 64 { for x in 0 ..< 10 { if hue_at(r.core, x, y) == .Dark_Blue { food_pixels += 1 } } }
+	testing.expect(t, food_pixels > 10)
+	// the three keys down the right edge, five pixels apart, starting at x = 52, y = 0
+	testing.expect(t, hue_at(r.core, 52 + 0, 0) != .Black || hue_at(r.core, 52 + 1, 1) != .Black)
+}
+
+@(test)
+readouts_are_zero_padded_to_three_digits :: proc(t: ^testing.T) {
+	buffer: [8]u8
+	testing.expect_value(t, game.format_readout(buffer[:], 'H', 100), "H100 ")
+	testing.expect_value(t, game.format_readout(buffer[:], 'S', 7), "S007 ")
+	testing.expect_value(t, game.format_readout(buffer[:], 'H', 0), "H000 ")
+	testing.expect_value(t, game.format_count(buffer[:], 0), "0")
+	testing.expect_value(t, game.format_count(buffer[:], 25), "25")
+}
+
+@(test)
+every_map_type_builds_a_full_grid_with_centred_doors :: proc(t: ^testing.T) {
+	w := new(game.World); defer free(w)
+	game.world_clear(w)
+	start := game.add_map(w, .Starting_Room)
+	end := game.add_map(w, .Ending_Room)
+	room := game.add_map(w, .Room)
+	for m in ([?]int{start, room}) {
+		// doors sit at the middle of each wall and the sign at the centre
+		for pos in ([?][2]int{{7, 0}, {7, 14}, {0, 7}, {14, 7}}) {
+			testing.expect_value(t, w.locations[game.location_id(m, pos.x, pos.y)].location_type, game.Location_Type.Door)
+		}
+		testing.expect_value(t, w.locations[game.location_id(m, 7, 7)].location_type, game.Location_Type.Sign)
+		testing.expect_value(t, w.locations[game.location_id(m, 0, 0)].location_type, game.Location_Type.Gray_Wall)
+	}
+	testing.expect_value(t, w.locations[game.location_id(start, 3, 3)].location_type, game.Location_Type.Starting_Room_Floor)
+	testing.expect_value(t, w.locations[game.location_id(room, 3, 3)].location_type, game.Location_Type.Room_Floor)
+	// the ending room: seven coloured doors and the final sign in the middle
+	testing.expect_value(t, w.locations[game.location_id(end, 7, 7)].location_type, game.Location_Type.Final_Sign)
+	testing.expect_value(t, w.locations[game.location_id(end, 7, 12)].location_type, game.Location_Type.Silver_Door)
+	testing.expect_value(t, w.locations[game.location_id(end, 3, 7)].location_type, game.Location_Type.Gold_Door)
+	// map ids follow creation order, and a location knows its place
+	loc := w.locations[game.location_id(room, 4, 9)]
+	testing.expect_value(t, int(loc.map_id), room)
+	testing.expect_value(t, int(loc.column), 4)
+	testing.expect_value(t, int(loc.row), 9)
+	testing.expect_value(t, game.location_at(w, room, -1, 3), game.NONE)
+	testing.expect_value(t, game.location_at(w, room, 15, 3), game.NONE)
+}
+
+@(test)
+statistics_clamp_to_their_bounds_like_the_original :: proc(t: ^testing.T) {
+	s: game.Stats
+	game.stat_set_min(&s, .Health, 0)
+	game.stat_set_max(&s, .Health, 100)
+	game.stat_set(&s, .Health, 100)
+	testing.expect_value(t, game.stat_change(&s, .Health, -130), 0)  // read back clamped
+	testing.expect_value(t, game.stat_change(&s, .Health, 500), 100)
+	testing.expect(t, !game.stat_has(&s, .Attack))
+	testing.expect_value(t, game.stat_get(&s, .Attack), 0)
+	testing.expect_value(t, game.stat_max(&s, .Attack), int(max(i32)))
 }

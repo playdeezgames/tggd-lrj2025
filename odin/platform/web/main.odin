@@ -62,3 +62,10 @@ main :: proc() {
 }
 @(export) platform_sfx_count :: proc "c" () -> i32 { return i32(out.sfx_count) }
 @(export) platform_sfx_at :: proc "c" (i: i32) -> i32 { return i32(out.sfx[i]) }
+
+// QA: show a room with the avatar at (column, row); kind is a Map_Type (0 starting, 1 ending, 2 room).
+@(export) platform_debug_room :: proc "c" (kind, column, row: i32) {
+	context = runtime.default_context()
+	if core == nil { return }
+	game.debug_show_room(core, game.Map_Type(clamp(kind, 0, 2)), int(column), int(row))
+}

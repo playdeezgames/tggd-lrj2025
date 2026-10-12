@@ -80,6 +80,9 @@
 		}
 		requestAnimationFrame(frame);
 	}
+	// ?room=0|1|2&x=N&y=N shows the starting room, the ending room or a room with the avatar at (x, y) (QA)
+	const q = new URLSearchParams(location.search);
+	if (q.has("room")) exports.platform_debug_room(Number(q.get("room")) | 0, Number(q.get("x") ?? 7) | 0, Number(q.get("y") ?? 7) | 0);
 	window.__platform = { exports, mem };
 	requestAnimationFrame(frame);
 })();
