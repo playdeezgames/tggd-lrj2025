@@ -143,6 +143,23 @@ Item :: struct {
 	in_use:    bool,
 }
 
+// ---- messages: a FIFO of modal pop-ups the player dismisses one by one (MessageData) --------------------------
+MAX_MESSAGES :: 32
+MAX_MESSAGE_LINES :: 6
+MESSAGE_TEXT_SIZE :: 24
+
+Message_Line :: struct {
+	text: [MESSAGE_TEXT_SIZE]u8,
+	len:  u8,
+}
+
+Message :: struct {
+	sfx:        Sfx,
+	has_sfx:    bool,
+	line_count: u8,
+	lines:      [MAX_MESSAGE_LINES]Message_Line,
+}
+
 World :: struct {
 	map_types:      [MAX_MAPS]Map_Type,
 	map_count:      int,
@@ -152,4 +169,6 @@ World :: struct {
 	items:          [MAX_ITEMS]Item,
 	item_count:     int,
 	avatar:         int, // character id, or NONE
+	messages:       [MAX_MESSAGES]Message,
+	message_count:  int,
 }

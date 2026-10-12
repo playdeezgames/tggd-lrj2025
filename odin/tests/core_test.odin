@@ -1,6 +1,7 @@
 #+build !js
 package tests
 
+import "core:fmt"
 import "core:testing"
 import "tggd:game"
 
@@ -533,4 +534,360 @@ many_seeds_generate_without_giving_up :: proc(t: ^testing.T) {
 		if w == nil { failures += 1 } else { free(w) }
 	}
 	testing.expect_value(t, failures, 0)
+}
+
+// ---- rules ---------------------------------------------------------------------------------------------
+// A bare room (map 0, ordinary room terrain) with the player at (5, 5). Returns the core to poke at.
+scene :: proc(r: ^Rig) -> ^game.Core {
+	c := r.core
+	game.world_clear(&c.world)
+	game.add_map(&c.world, .Room)
+	c.world.avatar = game.add_character(&c.world, .N00b, game.location_id(0, 5, 5))
+	return c
+}
+
+at :: proc(column, row: int) -> int { return game.location_id(0, column, row) }
+
+moon :: proc(c: ^game.Core, column, row: int) -> int {
+	return game.add_character(&c.world, .Moon_Person, at(column, row))
+}
+
+put :: proc(c: ^game.Core, t: game.Item_Type, column, row: int) -> int {
+	item := game.add_item(&c.world, t)
+	c.world.items[item].stats = game.item_initial_stats(t)
+	game.give_item(&c.world, item, .Location, at(column, row))
+	return item
+}
+
+carry :: proc(c: ^game.Core, t: game.Item_Type) -> int {
+	item := game.add_item(&c.world, t)
+	c.world.items[item].stats = game.item_initial_stats(t)
+	game.give_item(&c.world, item, .Character, c.world.avatar)
+	return item
+}
+
+avatar_at :: proc(c: ^game.Core) -> (column, row: int) {
+	loc := c.world.locations[c.world.characters[c.world.avatar].location]
+	return int(loc.column), int(loc.row)
+}
+
+stat :: proc(c: ^game.Core, character: int, s: game.Stat) -> int {
+	return game.stat_get(&c.world.characters[character].stats, s)
+}
+
+// Message i as "line|line|line".
+message_text :: proc(c: ^game.Core, i: int) -> string {
+	m := &c.world.messages[i]
+	text := ""
+	for l in 0 ..< int(m.line_count) {
+		line := string(m.lines[l].text[:m.lines[l].len])
+		text = line if l == 0 else fmt.tprintf("%s|%s", text, line)
+	}
+	return text
+}
+
+@(test)
+walking_onto_floor_moves_and_costs_a_satiety :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	game.attempt_move(c, c.world.avatar, .East)
+	col, row := avatar_at(c)
+	testing.expect_value(t, col, 6)
+	testing.expect_value(t, row, 5)
+	testing.expect_value(t, c.world.locations[at(5, 5)].character, i16(game.NONE))
+	testing.expect_value(t, stat(c, c.world.avatar, .Satiety), 99)
+	testing.expect_value(t, c.world.message_count, 0)
+}
+
+@(test)
+bumping_a_wall_stays_put_but_still_costs_a_satiety :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	game.move_character_to(&c.world, c.world.avatar, at(1, 5))
+	game.attempt_move(c, c.world.avatar, .West) // (0, 5) is a gray wall
+	col, _ := avatar_at(c)
+	testing.expect_value(t, col, 1)
+	testing.expect_value(t, stat(c, c.world.avatar, .Satiety), 99)
+}
+
+@(test)
+signs_say_their_room_number_and_the_final_sign_asks_the_question :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	c.world.locations[at(7, 7)].room_number = 9
+	game.move_character_to(&c.world, c.world.avatar, at(6, 7))
+	game.attempt_move(c, c.world.avatar, .East)
+	testing.expect_value(t, c.world.message_count, 1)
+	testing.expect_value(t, message_text(c, 0), "Room#9")
+	game.set_location_type(&c.world, at(7, 7), .Final_Sign)
+	game.attempt_move(c, c.world.avatar, .East)
+	testing.expect_value(t, message_text(c, 1), "Have you|checked|yer|butthole?")
+}
+
+@(test)
+a_door_carries_the_player_to_its_destination_and_picks_things_up_there :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	game.add_map(&c.world, .Room)
+	c.world.locations[at(7, 0)].destination = i16(game.location_id(1, 7, 13))
+	game.move_character_to(&c.world, c.world.avatar, at(7, 1))
+	put(c, .Food, 7, 13) // map 0 (the same room layout): irrelevant, check the other room below
+	item := game.add_item(&c.world, .Potion)
+	game.give_item(&c.world, item, .Location, game.location_id(1, 7, 13))
+	game.attempt_move(c, c.world.avatar, .North)
+	loc := c.world.locations[c.world.characters[c.world.avatar].location]
+	testing.expect_value(t, int(loc.map_id), 1)
+	testing.expect_value(t, int(loc.column), 7)
+	testing.expect_value(t, int(loc.row), 13)
+	testing.expect_value(t, c.world.items[item].holder, game.Holder_Kind.Character) // collected on arrival
+	testing.expect_value(t, message_text(c, 0), "<space>|to drink|potion.")
+}
+
+@(test)
+locked_doors_need_their_key_and_become_floor :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	game.set_location_type(&c.world, at(5, 4), .Gold_Door)
+	game.attempt_move(c, c.world.avatar, .North)
+	testing.expect_value(t, c.world.locations[at(5, 4)].location_type, game.Location_Type.Gold_Door)
+	testing.expect_value(t, c.sfx_queue[c.sfx_count - 1], game.Sfx.Shucks)
+	carry(c, .Silver_Key) // the wrong key
+	game.attempt_move(c, c.world.avatar, .North)
+	testing.expect_value(t, c.world.locations[at(5, 4)].location_type, game.Location_Type.Gold_Door)
+	key := carry(c, .Gold_Key)
+	game.attempt_move(c, c.world.avatar, .North)
+	testing.expect_value(t, c.world.locations[at(5, 4)].location_type, game.Location_Type.Ending_Room_Floor)
+	testing.expect_value(t, c.world.items[key].holder, game.Holder_Kind.None)
+	testing.expect_value(t, c.sfx_queue[c.sfx_count - 1], game.Sfx.Woo_Hoo)
+	_, row := avatar_at(c)
+	testing.expect_value(t, row, 5) // opening it does not move you
+	game.attempt_move(c, c.world.avatar, .North)
+	_, row = avatar_at(c)
+	testing.expect_value(t, row, 4)
+}
+
+@(test)
+the_first_sword_is_wielded_and_later_ones_are_spares :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	a := c.world.avatar
+	first := put(c, .Sword, 6, 5)
+	game.attempt_move(c, a, .East)
+	testing.expect_value(t, stat(c, a, .Attack), 20)
+	testing.expect_value(t, stat(c, a, .Sword_Durability), 5)
+	testing.expect_value(t, c.world.items[first].holder, game.Holder_Kind.None) // used up, not carried
+	testing.expect_value(t, message_text(c, 0), "You got|a sword!")
+	second := put(c, .Sword, 7, 5)
+	game.attempt_move(c, a, .East)
+	testing.expect_value(t, c.world.items[second].holder, game.Holder_Kind.Character)
+	testing.expect_value(t, message_text(c, 1), "Good to|have a|back-up!")
+	testing.expect_value(t, c.sfx_queue[0], game.Sfx.Yoink)
+}
+
+@(test)
+hints_appear_once_per_kind :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	put(c, .Food, 6, 5); put(c, .Food, 7, 5); put(c, .Silver_Key, 8, 5)
+	for _ in 0 ..< 3 { game.attempt_move(c, c.world.avatar, .East) }
+	testing.expect_value(t, c.world.message_count, 2) // one food hint, one key hint
+	testing.expect_value(t, message_text(c, 0), "Blueberry|(fer when|yer|hungry!)")
+	testing.expect_value(t, message_text(c, 1), "Save keys|to open|doors")
+	testing.expect_value(t, game.item_type_count(&c.world, .Character, c.world.avatar, .Food), 2)
+}
+
+@(test)
+attacking_a_moon_person_trades_blows :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	a := c.world.avatar
+	m := moon(c, 6, 5)
+	game.attempt_move(c, a, .East)
+	// the player hits for 10 - 0, the moon person (25 health) has 15 left and strikes back for 20 - 5
+	testing.expect_value(t, stat(c, m, .Health), 15)
+	testing.expect_value(t, stat(c, a, .Health), 85)
+	testing.expect_value(t, c.world.message_count, 2)
+	testing.expect_value(t, message_text(c, 0), "N00b|hits|for 10!|15 left!")
+	testing.expect_value(t, message_text(c, 1), "Moonie|hits|for 15!|85 left!")
+	testing.expect_value(t, c.world.messages[0].sfx, game.Sfx.Enemy_Hit) // the sound of the target being hit
+	testing.expect_value(t, c.world.messages[1].sfx, game.Sfx.Player_Hit)
+	col, _ := avatar_at(c)
+	testing.expect_value(t, col, 5)                                     // attacking does not move you
+	testing.expect_value(t, stat(c, a, .Satiety), 100)                  // and costs no satiety
+}
+
+@(test)
+killing_a_moon_person_reveals_what_it_stood_on :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	a := c.world.avatar
+	m := moon(c, 6, 5)
+	key := put(c, .Ruby_Key, 6, 5)
+	for _ in 0 ..< 3 { game.attempt_move(c, a, .East) }
+	testing.expect(t, game.is_dead(&c.world, m))
+	testing.expect_value(t, c.world.locations[at(6, 5)].character, i16(game.NONE))
+	testing.expect_value(t, c.world.items[key].holder, game.Holder_Kind.Location)
+	// hit, counter, hit, counter, then the killing blow: no "left" line, a kill message, and no counter
+	testing.expect_value(t, message_text(c, c.world.message_count - 2), "N00b|hits|for 10!")
+	testing.expect_value(t, message_text(c, c.world.message_count - 1), "N00b|kills|Moonie!")
+	testing.expect_value(t, c.world.messages[c.world.message_count - 1].sfx, game.Sfx.Enemy_Death)
+	testing.expect_value(t, stat(c, a, .Health), 70) // only two counter-strikes landed
+}
+
+@(test)
+leaving_a_threatened_tile_gives_a_free_strike_first :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	a := c.world.avatar
+	moon(c, 6, 5)
+	game.attempt_move(c, a, .West) // step away from the moon person next to us
+	testing.expect_value(t, stat(c, a, .Health), 85)
+	testing.expect_value(t, message_text(c, 0), "Moonie|hits|for 15!|85 left!")
+	col, _ := avatar_at(c)
+	testing.expect_value(t, col, 4)
+	game.attempt_move(c, a, .West) // out of reach: nothing happens
+	testing.expect_value(t, stat(c, a, .Health), 85)
+	testing.expect_value(t, c.world.message_count, 1)
+}
+
+@(test)
+a_sword_wears_out_and_the_next_spare_takes_over :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	a := c.world.avatar
+	stat_set := game.stat_set
+	stat_set(&c.world.characters[a].stats, .Attack, 20)
+	stat_set(&c.world.characters[a].stats, .Sword_Durability, 1)
+	spare := carry(c, .Sword)
+	m := moon(c, 6, 5)
+	stat_set(&c.world.characters[m].stats, .Defend, 5) // so the hit is 15, not enough to kill
+	game.attempt_move(c, a, .East)
+	// the hit message, the counter, then the sword breaks (one spare left, none after it)
+	found := false
+	for i in 0 ..< c.world.message_count {
+		if message_text(c, i) == "Yer sword|broke!|Equipping|next one!|(0 left)" { found = true }
+	}
+	testing.expect(t, found)
+	testing.expect_value(t, stat(c, a, .Sword_Durability), 5)
+	testing.expect_value(t, c.world.items[spare].holder, game.Holder_Kind.None)
+	// with no spare, the last sword breaks and the bare-handed attack returns
+	stat_set(&c.world.characters[a].stats, .Sword_Durability, 1)
+	game.attempt_move(c, a, .East)
+	testing.expect_value(t, stat(c, a, .Attack), 10)
+}
+
+@(test)
+hunger_eats_when_empty_and_wounds_when_there_is_nothing_to_eat :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	a := c.world.avatar
+	game.stat_set(&c.world.characters[a].stats, .Satiety, 0)
+	game.attempt_move(c, a, .East)
+	testing.expect_value(t, stat(c, a, .Satiety), 0)
+	testing.expect_value(t, stat(c, a, .Health), 99) // nothing to eat
+	food := carry(c, .Food)
+	game.attempt_move(c, a, .East)
+	testing.expect_value(t, stat(c, a, .Satiety), 25)
+	testing.expect_value(t, stat(c, a, .Health), 99)
+	testing.expect_value(t, c.world.items[food].holder, game.Holder_Kind.None)
+	testing.expect_value(t, message_text(c, 0), "Hungry?|Blueberries|satisfy!")
+	testing.expect(t, c.sfx_count > 0 && c.sfx_queue[c.sfx_count - 1] == .Eat)
+}
+
+@(test)
+starving_to_death_kills_without_a_message :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	a := c.world.avatar
+	game.stat_set(&c.world.characters[a].stats, .Satiety, 0)
+	game.stat_set(&c.world.characters[a].stats, .Health, 1)
+	game.attempt_move(c, a, .East)
+	testing.expect(t, game.is_dead(&c.world, a))
+	testing.expect_value(t, c.world.message_count, 0)
+}
+
+@(test)
+potions_heal_up_to_the_maximum_and_say_so :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	a := c.world.avatar
+	game.attempt_use_item_of_type(c, a, .Potion)
+	testing.expect_value(t, message_text(c, 0), "You have|no Potion")
+	game.stat_set(&c.world.characters[a].stats, .Health, 80)
+	carry(c, .Potion)
+	game.attempt_use_item_of_type(c, a, .Potion)
+	testing.expect_value(t, stat(c, a, .Health), 100)
+	testing.expect_value(t, message_text(c, 1), "+50 health|you have|100/100")
+	testing.expect_value(t, game.item_type_count(&c.world, .Character, a, .Potion), 0)
+}
+
+@(test)
+dying_in_a_fight_clears_the_tile_and_ends_with_a_kill_message :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	a := c.world.avatar
+	game.stat_set(&c.world.characters[a].stats, .Health, 10)
+	moon(c, 6, 5)
+	game.attempt_move(c, a, .East)
+	testing.expect(t, game.is_dead(&c.world, a))
+	testing.expect_value(t, c.world.locations[at(5, 5)].character, i16(game.NONE))
+	testing.expect_value(t, message_text(c, c.world.message_count - 1), "Moonie|kills|N00b!")
+	testing.expect_value(t, c.world.messages[c.world.message_count - 1].sfx, game.Sfx.Player_Death)
+}
+
+@(test)
+messages_dismiss_in_order_and_a_full_queue_drops_extras :: proc(t: ^testing.T) {
+	r := rig_new(); defer rig_free(&r)
+	c := scene(&r)
+	a := c.world.avatar
+	game.add_message(c, a, .Take, "one")
+	game.add_message(c, a, nil, "two")
+	game.add_message(c, 99, nil, "not the avatar's") // other characters are told nothing
+	testing.expect_value(t, c.world.message_count, 2)
+	testing.expect_value(t, game.current_message_line(&c.world, 0), "one")
+	game.dismiss_message(&c.world)
+	testing.expect_value(t, game.current_message_line(&c.world, 0), "two")
+	game.dismiss_message(&c.world)
+	game.dismiss_message(&c.world) // dismissing nothing is harmless
+	testing.expect_value(t, c.world.message_count, 0)
+	for _ in 0 ..< game.MAX_MESSAGES + 5 { game.add_message(c, a, nil, "x") }
+	testing.expect_value(t, c.world.message_count, game.MAX_MESSAGES)
+}
+
+@(test)
+a_random_walk_never_breaks_the_world_invariants :: proc(t: ^testing.T) {
+	// 20 worlds, 3000 random commands each (moves and potion use), checking after every step that the occupancy
+	// bookkeeping agrees, the avatar is somewhere sensible, and nothing overflows. Stops at death.
+	r := rig_new(); defer rig_free(&r)
+	c := r.core
+	for seed in 0 ..< u64(20) {
+		rng: game.Rng
+		game.rng_seed(&rng, seed + 1000)
+		ok := game.generate_world(&c.world, &rng)
+		testing.expect(t, ok)
+		for _ in 0 ..< 3000 {
+			if game.is_dead(&c.world, c.world.avatar) { break }
+			roll := game.rng_range(&rng, 0, 9)
+			if roll == 9 {
+				game.attempt_use_item_of_type(c, c.world.avatar, .Potion)
+			} else {
+				game.attempt_move(c, c.world.avatar, game.Direction(roll % 4))
+			}
+			for game.has_messages(&c.world) { game.dismiss_message(&c.world) }
+			c.sfx_count = 0
+			free_all(context.temp_allocator)
+			w := &c.world
+			for i in 0 ..< w.character_count {
+				ch := &w.characters[i]
+				if game.is_dead(w, i) { continue }
+				if int(w.locations[ch.location].character) != i {
+					testing.expectf(t, false, "seed %d: character %d is not on its location", seed, i)
+					return
+				}
+			}
+			avatar := w.characters[w.avatar]
+			testing.expect(t, game.stat_get(&avatar.stats, .Satiety) >= 0 && game.stat_get(&avatar.stats, .Satiety) <= 100)
+			testing.expect(t, game.stat_get(&avatar.stats, .Health) >= 0 && game.stat_get(&avatar.stats, .Health) <= 100)
+		}
+	}
 }

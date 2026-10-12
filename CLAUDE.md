@@ -29,7 +29,7 @@ PORT=8091 tools/serve.sh   # serve build/web; avoid 8765, often taken
 
 Layout: `odin/game` (package `game`, no platform imports, `core_init`/`core_step`, imported as `tggd:game` via `-collection:tggd=odin`), `odin/platform/web` (`#+build js`: exports + `page/` JS), `odin/tests` (`#+build !js`). Input is the original's 8 `Command`s; the page's key table is a copy of `Home.razor`'s `CommandTable` (case-sensitive and held keys repeat, as in the original; both are quirks to decide later).
 
-Milestone status: 1 (skeleton), 2 (assets), 3 (static render) and 4 (world generation) done. Next: rules (5), UI states (6), saving, touch, ship. `TODO.md` lists the asset attribution still owed; `QUIRKS.md` lists the original's oddities the port preserves, to be decided with the owner one at a time.
+Milestone status: 1 (skeleton), 2 (assets), 3 (static render), 4 (world generation) and 5 (rules) done. Next: UI states (6: title, menus, tutorial, messages, confirm, dead; wire commands to `attempt_move` / `attempt_use_item_of_type`), saving, touch, ship. `TODO.md` lists the asset attribution still owed; `QUIRKS.md` lists the original's oddities the port preserves, to be decided with the owner one at a time.
 
 Generation (`worldgen.odin`): `generate_world(world, rng)` builds maps, the maze (main path 1..15 through unused doors, then side paths), 40 moon people, then items by `ITEM_COUNT`. It has its own splitmix64 RNG, so a seed reproduces a world (`?seed=N` on the page); it cannot match the original's unseeded `System.Random`.
 
@@ -77,3 +77,5 @@ Things that need several files to understand:
 ## Assets and licensing
 
 `Bit-Bonanza-10x10-v-5.0/` and `Bountiful-Bits-10x10-v-3.1/` are VEXED's CC0 10x10 sprite packs (1-bit variants used); see their README.txt files and the vault's `Tech/Bit Bonanza.md` / `Tech/Bountiful Bits.md` for tile coordinates. `EndingRoomLayout.png` and `IntermediateLayout.png` are the 15x15 room design references; `ss/cover.png` is the itch.io cover.
+
+Rules (`rules.odin`): `attempt_move`, `attempt_use_item_of_type`, `interact` (the fight, with counter-strike), `handle_threats` (free strikes on leaving a tile), `on_move` (hunger, pickup), `bump`, `take_item`/`use_item`. They act on `^Core` (world, sfx queue, message queue); `add_message` only tells the avatar. Messages are a FIFO in `World` (`dismiss_message`, `current_message_line`); a message's own sound is played by the UI when it is shown, not by the rules. Tests build small scenes with `scene()` in `odin/tests`.

@@ -12,5 +12,12 @@ generated worlds in the port (`odin/tests`), not from the original, which has no
 | 4 | About half of the worlds (265 of 500) have a door that leads back into its own room | `WorldInitializer.InitializeSidePaths` | the candidate list for a side path includes the room itself; avg 1.5 such doors per world |
 | 5 | Each map is picked uniformly before its tile, so a room's share of items does not depend on its size | `WorldInitializer.InitializeItemType` | the starting and ending rooms get as many items as an ordinary room |
 | 6 | Keys start hidden under moon people (a key's spawn rule needs a non-player character on a room floor) | `KeyItemTypeDescriptor.CanSpawn` | probably deliberate; killing the moon person reveals the key |
-| 7 | `World.Initialize` clears maps, characters, locations and the avatar but **not** items or queued messages | `World.Clear` | check in milestone 5 whether stale messages show on a new game |
+| 7 | `World.Initialize` clears maps, characters, locations and the avatar but **not** items or queued messages | `World.Clear` | no visible effect: messages are always empty when the game menu or the death screen is reachable; the port clears everything |
 | 8 | An empty spawn candidate list would crash the original (index into an empty list) | `RNG.FromEnumerable` | cannot happen with these counts; the port retries generation instead |
+| 9 | Walking into a wall, a sign or a locked door counts as a move: it costs a satiety (or a health when starving) and gives adjacent moon people their free strike | `Character.AttemptMove` (`OnMove` runs after `Bump`) | opening a locked door uses a turn and does not move you |
+| 10 | The free strike when you leave a threatened tile happens **before** the move, and also when you drink a potion; attacking does not cost satiety and does not give *other* moon people a strike | `Character.HandleThreats` | |
+| 11 | The potion message always says "+50 health" even when the heal was capped | `PotionItemTypeDescriptor.OnUse` | "you have 100/100" below it is correct |
+| 12 | A message's sound plays on **every** refresh of the message screen, so pressing a non-confirm key replays it | `MessageState.Refresh` | applies in milestone 6 (UI) |
+| 13 | Moon people never move; they only strike back | `MoonPersonCharacterTypeDescriptor.OnMove` is empty | |
+| 14 | Stepping through a door puts you on the far tile without checking for an occupant (it would overwrite one) | `DoorLocationTypeDescriptor.Bump` | cannot happen: spawning keeps moon people off those tiles |
+| 15 | A moon person's sword and shield durability drift below zero as it fights (it has no minimum) | `OnHitEnemy`/`OnHitByEnemy` | no visible effect |
