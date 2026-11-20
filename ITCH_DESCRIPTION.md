@@ -6,6 +6,8 @@ Paste by hand. Short description (the one line under the title):
 
 ## Body
 
+**Latest version:** https://playdeezgames.github.io/tggd-lrj2025/
+
 **The Blue Room of SPLORR!!**
 
 You are a N00b in a maze of sixteen rooms, drawn on a 64 by 64 pixel screen. Eat, fight, find the seven keys and open the doors of the last room.
